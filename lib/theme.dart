@@ -33,8 +33,8 @@ const lightColorScheme = ColorScheme(
   inversePrimary: Color(0xFF88CEFF),
   shadow: Color(0xFF000000),
   surfaceTint: Color(0xFF006590),
-  // outlineVariant: Color(0xFFC1C7CE),
-  // scrim: Color(0xFF000000),
+  outlineVariant: Color(0xFFC1C7CE),
+  scrim: Color(0xFF000000),
 );
 
 const darkColorScheme = ColorScheme(
@@ -67,8 +67,8 @@ const darkColorScheme = ColorScheme(
   inversePrimary: Color(0xFF006590),
   shadow: Color(0xFF000000),
   surfaceTint: Color(0xFF88CEFF),
-  // outlineVariant: Color(0xFF41484D),
-  // scrim: Color(0xFF000000),
+  outlineVariant: Color(0xFF41484D),
+  scrim: Color(0xFF000000),
 );
 
 
@@ -113,6 +113,7 @@ final ThemeData baseDarkTheme = ThemeData.from(
 final ThemeData lightTheme = baseLightTheme.copyWith(
   dividerTheme: baseLightTheme.dividerTheme.copyWith(
     space: 1,
+    color: baseLightTheme.colorScheme.surfaceVariant,
   ),
   pageTransitionsTheme: pageTransitionsTheme,
 );
@@ -120,6 +121,7 @@ final ThemeData lightTheme = baseLightTheme.copyWith(
 final ThemeData darkTheme = baseDarkTheme.copyWith(
   dividerTheme: baseDarkTheme.dividerTheme.copyWith(
     space: 1,
+    color: baseDarkTheme.colorScheme.surfaceVariant,
   ),
   pageTransitionsTheme: pageTransitionsTheme,
 );
