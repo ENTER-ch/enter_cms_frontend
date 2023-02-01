@@ -107,7 +107,10 @@ final ThemeData baseLightTheme = ThemeData.from(
 final ThemeData baseDarkTheme = ThemeData.from(
   colorScheme: darkColorScheme,
   useMaterial3: true,
-  textTheme: textTheme,
+  textTheme: textTheme.apply(
+    bodyColor: darkColorScheme.onBackground,
+    displayColor: darkColorScheme.onBackground,
+  ),
 );
 
 final ThemeData lightTheme = baseLightTheme.copyWith(
@@ -116,6 +119,10 @@ final ThemeData lightTheme = baseLightTheme.copyWith(
     color: baseLightTheme.colorScheme.surfaceVariant,
   ),
   pageTransitionsTheme: pageTransitionsTheme,
+  appBarTheme: baseLightTheme.appBarTheme.copyWith(
+    backgroundColor: baseLightTheme.colorScheme.primary,
+    foregroundColor: Colors.white,
+  ),
 );
 
 final ThemeData darkTheme = baseDarkTheme.copyWith(
@@ -124,4 +131,8 @@ final ThemeData darkTheme = baseDarkTheme.copyWith(
     color: baseDarkTheme.colorScheme.surfaceVariant,
   ),
   pageTransitionsTheme: pageTransitionsTheme,
+  appBarTheme: baseDarkTheme.appBarTheme.copyWith(
+    backgroundColor: baseDarkTheme.colorScheme.primaryContainer,
+    foregroundColor: Colors.white,
+  ),
 );

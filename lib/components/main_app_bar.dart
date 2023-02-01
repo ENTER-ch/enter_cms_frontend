@@ -12,8 +12,6 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: _toolbarHeight,
       title: _buildTitle(context),
       centerTitle: false,
-      backgroundColor: Theme.of(context).primaryColor,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
   }
 
@@ -21,13 +19,13 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
     children: [
       EnterLogo(
         height: _toolbarHeight / 2,
-        color: Theme.of(context).colorScheme.onPrimary,
+        color: Theme.of(context).primaryTextTheme.titleMedium?.color,
       ),
       const SizedBox(width: 16),
       Text(
         'Content Management System',
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
-          color: Theme.of(context).colorScheme.onPrimary,
+          color: Theme.of(context).primaryTextTheme.titleMedium?.color,
         ),
       ),
     ],

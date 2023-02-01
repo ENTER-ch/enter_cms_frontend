@@ -25,6 +25,9 @@ class _ContentScreenState extends State<ContentScreen> {
   late MapBloc _mapBloc;
   late ContentBloc _contentBloc;
 
+  bool _expandMap = false;
+  bool _expandList = false;
+
   @override
   void initState() {
     super.initState();
@@ -79,15 +82,25 @@ class _ContentScreenState extends State<ContentScreen> {
               children: [
                 const ContentToolbar(),
                 const Divider(),
-                Expanded(
+                if (!_expandList) Expanded(
                     child: ContentMapView(
                   mapBloc: _mapBloc,
                   contentBloc: _contentBloc,
                 )),
-                const Divider(),
-                SizedBox(
+                if (!_expandList && !_expandMap) const Divider(),
+                if (!_expandMap) SizedBox(
                   height: 250,
-                  child: ContentListView(contentBloc: _contentBloc),
+                  child: ContentListView(
+                    contentBloc: _contentBloc,
+                    onExpand: (expand) {
+                      setState(() {
+                        if (expand) _expandMap = false;
+                        _expandList = expand;
+                        print('expand list: $_expandList');
+                      });
+                    },
+                    expanded: _expandList,
+                  ),
                 )
               ],
             ),

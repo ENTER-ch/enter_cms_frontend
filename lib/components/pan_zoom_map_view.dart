@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:enter_cms_flutter/components/interactive_viewer.dart';
 import 'package:enter_cms_flutter/models/floorplan.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 import 'package:flutter/material.dart';
@@ -157,7 +158,8 @@ class _PanZoomMapViewState extends State<PanZoomMapView>
     final size = MediaQuery.of(context).size;
     return Stack(
       children: [
-        InteractiveViewer.builder(
+        CustomInteractiveViewer.builder(
+          trackpadScrollCausesScale: true,
           transformationController: _transformationController,
           onInteractionStart: _onInteractionStart,
           maxScale: 2.0,

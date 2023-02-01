@@ -1,5 +1,6 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:enter_cms_flutter/bloc/content/content_bloc.dart';
+import 'package:enter_cms_flutter/components/toolbar_button.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,9 +9,13 @@ class ContentListView extends StatefulWidget {
   const ContentListView({
     Key? key,
     required this.contentBloc,
+    this.expanded,
+    this.onExpand,
   }) : super(key: key);
 
   final ContentBloc contentBloc;
+  final bool? expanded;
+  final void Function(bool expanded)? onExpand;
 
   @override
   State<ContentListView> createState() => _ContentListViewState();
@@ -27,10 +32,10 @@ class _ContentListViewState extends State<ContentListView> {
     final isAscending = _sortAscending;
     switch (_sortColumnIndex) {
       case 0:
-        items.sort((a, b) => a.touchpointId?.compareTo(b.touchpointId ?? 0) ?? 0);
+        items.sort((a, b) => a.type.name.compareTo(b.type.name));
         break;
       case 1:
-        items.sort((a, b) => a.type.name.compareTo(b.type.name));
+        items.sort((a, b) => a.touchpointId?.compareTo(b.touchpointId ?? 0) ?? 0);
         break;
       case 2:
         items.sort((a, b) => a.internalTitle?.compareTo(b.internalTitle ?? '') ?? 0);
@@ -62,6 +67,8 @@ class _ContentListViewState extends State<ContentListView> {
         if (state is ContentLoaded) {
           return DataTable2(
             headingRowHeight: 36,
+            dataRowHeight: 36,
+            horizontalMargin: 16,
             sortColumnIndex: _sortColumnIndex,
             sortAscending: _sortAscending,
             columns: [
@@ -79,10 +86,18 @@ class _ContentListViewState extends State<ContentListView> {
                 label: const Text('Title'),
                 onSort: _onSort,
               ),
+              DataColumn2(label: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (widget.expanded != null) ToolbarButton(
+                    icon: widget.expanded! ? Icons.close_fullscreen : Icons.open_in_full,
+                    onTap: () => widget.onExpand?.call(!widget.expanded!),
+                  ),
+                ]
+              )),
             ],
             rows: _sortRows(state.touchpoints)
                 .map((e) => DataRow2(
-                      specificRowHeight: 36,
                       selected: state.selectedTouchpoint?.id == e.id,
                       onTap: () => _onSelectTouchpoint(e),
                       cells: [
@@ -97,6 +112,7 @@ class _ContentListViewState extends State<ContentListView> {
                         DataCell(
                             Text(e.touchpointId.toString().padLeft(3, '0'))),
                         DataCell(Text(e.internalTitle ?? '')),
+                        const DataCell(SizedBox()),
                       ],
                     ))
                 .toList(),

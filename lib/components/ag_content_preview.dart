@@ -45,6 +45,7 @@ class AGContentPreview extends StatelessWidget {
             width: 2.0,
           ),
           borderRadius: BorderRadius.circular(8),
+          color: Colors.white,
         ),
         clipBehavior: Clip.hardEdge,
         child: child,

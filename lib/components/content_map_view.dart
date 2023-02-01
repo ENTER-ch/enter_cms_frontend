@@ -27,6 +27,14 @@ class ContentMapView extends StatelessWidget {
     contentBloc.add(ContentEventSelectTouchpoint(touchpoint: touchpoint));
   }
 
+  void _contextBlocListener(BuildContext context, ContentState state) {
+    if (state is ContentLoaded) {
+      if (state.selectedTouchpoint != null) {
+        // TODO: Scroll to selected touchpoint
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MapBloc, MapState>(
@@ -50,8 +58,9 @@ class ContentMapView extends StatelessWidget {
 
   Widget _buildOverlay(
       BuildContext context, vector_math.Quad viewport, double scale) {
-    return BlocBuilder<ContentBloc, ContentState>(
+    return BlocConsumer<ContentBloc, ContentState>(
       bloc: contentBloc,
+      listener: _contextBlocListener,
       builder: (context, state) {
         if (state is ContentLoaded) {
           final filteredTouchpoints = state.touchpoints.where((touchpoint) {
@@ -66,6 +75,7 @@ class ContentMapView extends StatelessWidget {
               ...filteredTouchpoints.map((t) {
                 final offset = t.position!.toOffset();
                 return Positioned(
+                  key: ValueKey(t.id),
                   left: offset.dx,
                   top: offset.dy,
                   child: Transform.scale(
