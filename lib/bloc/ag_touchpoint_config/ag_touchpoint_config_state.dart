@@ -28,5 +28,5 @@ class AGTouchpointConfigLoaded extends AGTouchpointConfigState {
   List<Object> get props => [config];
 
   @override
-  String toString() => 'AGTouchpointConfigLoaded(${config.touchpointId})';
+  String toString() => 'AGTouchpointConfigLoaded(${config})';
 }

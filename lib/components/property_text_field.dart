@@ -10,6 +10,7 @@ class PropertyTextField extends StatelessWidget {
     this.errorText,
     this.maxLines,
     this.suffix,
+    this.labelMinWidth,
     this.onSubmitted,
   }) : super(key: key);
 
@@ -20,6 +21,7 @@ class PropertyTextField extends StatelessWidget {
   final String? errorText;
   final int? maxLines;
   final Widget? suffix;
+  final double? labelMinWidth;
   final void Function()? onSubmitted;
 
   @override
@@ -37,8 +39,7 @@ class PropertyTextField extends StatelessWidget {
           errorText: errorText,
           contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
           prefixIcon: _buildPrefixLabel(context),
-          prefixIconConstraints:
-          const BoxConstraints(minWidth: 48),
+          prefixIconConstraints: BoxConstraints(minWidth: labelMinWidth ?? 48),
           suffixIcon: suffix,
           suffixIconConstraints: const BoxConstraints(maxWidth: 80),
           enabledBorder: const OutlineInputBorder(

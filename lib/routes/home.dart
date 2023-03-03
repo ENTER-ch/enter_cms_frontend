@@ -69,45 +69,53 @@ class _ContentScreenState extends State<ContentScreen> {
         children: [
           SizedBox(
               width: 200,
-              child: Column(
-                children: [
-                  SizedBox(
-                      height: 200, child: MapChooserWidget(mapBloc: _mapBloc)),
-                  const Divider(),
-                ],
+              height: double.infinity,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MapChooserWidget(mapBloc: _mapBloc),
+                    const Divider(),
+                  ],
+                ),
               )),
           const VerticalDivider(),
           Expanded(
             child: Column(
               children: [
-                const ContentToolbar(),
-                const Divider(),
-                if (!_expandList) Expanded(
-                    child: ContentMapView(
-                  mapBloc: _mapBloc,
+                ContentToolbar(
                   contentBloc: _contentBloc,
-                )),
-                if (!_expandList && !_expandMap) const Divider(),
-                if (!_expandMap) SizedBox(
-                  height: 250,
-                  child: ContentListView(
+                ),
+                const Divider(),
+                if (!_expandList)
+                  Expanded(
+                      child: ContentMapView(
+                    mapBloc: _mapBloc,
                     contentBloc: _contentBloc,
-                    onExpand: (expand) {
-                      setState(() {
-                        if (expand) _expandMap = false;
-                        _expandList = expand;
-                        print('expand list: $_expandList');
-                      });
-                    },
-                    expanded: _expandList,
-                  ),
-                )
+                  )),
+                if (!_expandList && !_expandMap) const Divider(),
+                if (!_expandMap)
+                  SizedBox(
+                    height: 250,
+                    child: ContentListView(
+                      contentBloc: _contentBloc,
+                      onExpand: (expand) {
+                        setState(() {
+                          if (expand) _expandMap = false;
+                          _expandList = expand;
+                          print('expand list: $_expandList');
+                        });
+                      },
+                      expanded: _expandList,
+                    ),
+                  )
               ],
             ),
           ),
           const VerticalDivider(),
           SizedBox(
             width: 300,
+            height: double.infinity,
             child: InspectorPane(
               contentBloc: _contentBloc,
             ),
@@ -128,24 +136,27 @@ class InspectorPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        BlocBuilder<ContentBloc, ContentState>(
-          bloc: contentBloc,
-          builder: (context, state) {
-            if (state is ContentLoaded) {
-              if (state.selectedTouchpoint != null) {
-                return TouchpointEditorWidget(
-                  key: ValueKey(state.selectedTouchpoint!.id),
-                  contentBloc: contentBloc,
-                  touchpoint: state.selectedTouchpoint!,
-                );
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BlocBuilder<ContentBloc, ContentState>(
+            bloc: contentBloc,
+            builder: (context, state) {
+              if (state is ContentLoaded) {
+                if (state.selectedTouchpoint != null) {
+                  return TouchpointEditorWidget(
+                    key: ValueKey(state.selectedTouchpoint!.id),
+                    contentBloc: contentBloc,
+                    touchpoint: state.selectedTouchpoint!,
+                  );
+                }
               }
-            }
-            return const SizedBox();
-          },
-        ),
-      ],
+              return const SizedBox();
+            },
+          ),
+        ],
+      ),
     );
   }
 }

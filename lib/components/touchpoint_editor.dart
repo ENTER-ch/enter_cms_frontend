@@ -49,51 +49,53 @@ class _TouchpointEditorWidgetState extends State<TouchpointEditorWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 130),
-          child: ContentNavWidget(
-            title: const Text('Touchpoint'),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InteractivePropertyTextField(
-                    labelText: 'ID',
-                    initialValue: widget.touchpoint?.touchpointId.toString() ?? '',
-                    onSave: (value) async {
-                      final result = await contentApi.updateTouchpoint(
-                        widget.touchpoint!.copyWith(touchpointId: int.parse(value)),
-                      );
-                      widget.contentBloc.add(ContentEventUpdateTouchpoint(touchpoint: result));
-                    },
-                    onValidate: (value) async {
-                      if (value.isEmpty) {
-                        return 'ID is required';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'ID must be a number';
-                      }
-                      return null;
-                    },
-                  ),
-                  PropertyTextField(
-                    controller: _titleController,
-                    labelText: 'Title',
-                  ),
-                ],
-              ),
+        ContentNavWidget(
+          title: const Text('Touchpoint'),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                InteractivePropertyTextField(
+                  labelText: 'ID',
+                  initialValue: widget.touchpoint?.touchpointId.toString() ?? '',
+                  onSave: (value) async {
+                    final result = await contentApi.updateTouchpoint(
+                      widget.touchpoint!.copyWith(touchpointId: int.parse(value)),
+                    );
+                    widget.contentBloc.add(ContentEventUpdateTouchpoint(touchpoint: result));
+                  },
+                  onValidate: (value) async {
+                    if (value.isEmpty) {
+                      return 'ID is required';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'ID must be a number';
+                    }
+                    return null;
+                  },
+                ),
+                InteractivePropertyTextField(
+                  labelText: 'Title',
+                  controller: _titleController,
+                  initialValue: widget.touchpoint?.internalTitle ?? '',
+                  onSave: (value) async {
+                    final result = await contentApi.updateTouchpoint(
+                      widget.touchpoint!.copyWith(internalTitle: value),
+                    );
+                    widget.contentBloc.add(ContentEventUpdateTouchpoint(touchpoint: result));
+                  },
+                ),
+              ],
             ),
           ),
         ),
         const Divider(),
         if (widget.touchpoint?.type == TouchpointType.audioguide)
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 600),
-            child: AGTouchpointEditor(
-              touchpoint: widget.touchpoint!,
-            ),
+          AGTouchpointEditor(
+            touchpoint: widget.touchpoint!,
           ),
       ],
     );

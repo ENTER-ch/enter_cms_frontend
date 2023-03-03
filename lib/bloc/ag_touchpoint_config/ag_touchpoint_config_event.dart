@@ -14,6 +14,17 @@ class AGTouchpointConfigEventInit extends AGTouchpointConfigEvent {
   List<Object> get props => [];
 }
 
+class AGTouchpointConfigEventUpdateConfig extends AGTouchpointConfigEvent {
+  final MAGTouchpointConfig config;
+
+  const AGTouchpointConfigEventUpdateConfig({
+    required this.config,
+  });
+
+  @override
+  List<Object> get props => [config];
+}
+
 class AGTouchpointConfigEventUpdateContent extends AGTouchpointConfigEvent {
   final MAGContent content;
 

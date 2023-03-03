@@ -26,21 +26,24 @@ class MapChooserWidget extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, MapState state) {
     if (state is MapLoaded) {
-      return ListView.builder(
-        itemCount: state.floorplans.length,
-        itemBuilder: (context, index) {
-          final floorplan = state.floorplans[index];
-          return ListTile(
-            dense: true,
-            selectedTileColor:
-            Theme.of(context).colorScheme.surfaceTint.withOpacity(0.1),
-            title: Text(floorplan.title ?? 'Untitled'),
-            selected: floorplan.id == state.selectedFloorplan?.id,
-            onTap: () {
-              mapBloc.add(MapEventSelectFloorplan(floorplan: floorplan));
-            },
-          );
-        },
+      return SizedBox(
+        height: 200,
+        child: ListView.builder(
+          itemCount: state.floorplans.length,
+          itemBuilder: (context, index) {
+            final floorplan = state.floorplans[index];
+            return ListTile(
+              dense: true,
+              selectedTileColor:
+              Theme.of(context).colorScheme.surfaceTint.withOpacity(0.1),
+              title: Text(floorplan.title ?? 'Untitled'),
+              selected: floorplan.id == state.selectedFloorplan?.id,
+              onTap: () {
+                mapBloc.add(MapEventSelectFloorplan(floorplan: floorplan));
+              },
+            );
+          },
+        ),
       );
     }
     return const SizedBox();

@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:enter_cms_flutter/api/content_api.dart';
+import 'package:enter_cms_flutter/api/media_api.dart';
 import 'package:enter_cms_flutter/api/mock/content_mock_api.dart';
+import 'package:enter_cms_flutter/api/mock/media_mock_api.dart';
 import 'package:enter_cms_flutter/application.dart';
 import 'package:enter_cms_flutter/bloc/ag_content_preview/ag_content_preview_bloc.dart';
 import 'package:enter_cms_flutter/bloc/bloc_delegate.dart';
@@ -41,6 +43,10 @@ Future<void> startApplication() async {
 
   getIt.registerLazySingleton<ContentApi>(
     () => ContentMockApi(),
+  );
+
+  getIt.registerLazySingleton<MediaApi>(
+    () => MediaMockApi(),
   );
 
   getIt.registerLazySingleton<AgContentPreviewBloc>(() {

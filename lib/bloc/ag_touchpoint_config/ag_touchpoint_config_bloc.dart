@@ -19,6 +19,7 @@ class AGTouchpointConfigBloc extends Bloc<AGTouchpointConfigEvent, AGTouchpointC
     required this.touchpoint,
   }) : super(AGTouchpointConfigInitial()) {
     on<AGTouchpointConfigEventInit>(_onInit);
+    on<AGTouchpointConfigEventUpdateConfig>(_onUpdateConfig);
     on<AGTouchpointConfigEventUpdateContent>(_onUpdateContent);
   }
 
@@ -31,6 +32,13 @@ class AGTouchpointConfigBloc extends Bloc<AGTouchpointConfigEvent, AGTouchpointC
     } catch (e) {
       const config = MAGTouchpointConfig();
       emit(const AGTouchpointConfigLoaded(config: config));
+    }
+  }
+
+  void _onUpdateConfig(AGTouchpointConfigEventUpdateConfig event, Emitter<AGTouchpointConfigState> emit) async {
+    if (state is AGTouchpointConfigLoaded) {
+      final result = await contentApi.updateAGTouchpointConfig(event.config);
+      emit(AGTouchpointConfigLoaded(config: result));
     }
   }
 

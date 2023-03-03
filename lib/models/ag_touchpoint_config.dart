@@ -31,3 +31,15 @@ enum AGPlaybackMode {
   @JsonValue('prompt')
   prompt,
 }
+extension AGPlaybackModeExtension on AGPlaybackMode {
+  String get label {
+    switch (this) {
+      case AGPlaybackMode.autoSingle:
+        return 'Auto Single';
+      case AGPlaybackMode.autoLoop:
+        return 'Auto Loop';
+      case AGPlaybackMode.prompt:
+        return 'Prompt';
+    }
+  }
+}

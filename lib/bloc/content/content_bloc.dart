@@ -16,6 +16,7 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
   }) : super(ContentInitial()) {
     on<ContentEventLoad>(_onLoad);
     on<ContentEventSelectTouchpoint>(_onSelectTouchpoint);
+    on<ContentEventCreateTouchpoint>(_onCreateTouchpoint);
     on<ContentEventUpdateTouchpoint>(_onUpdateTouchpoint);
   }
 
@@ -25,6 +26,7 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     final touchpoints = await contentApi.getTouchpointsOfFloorplan(floorplanId: event.floorplanId);
 
     emit(ContentLoaded(touchpoints: touchpoints));
+    if (touchpoints.isNotEmpty) add(ContentEventSelectTouchpoint(touchpoint: touchpoints.first));
   }
 
   void _onSelectTouchpoint(ContentEventSelectTouchpoint event, Emitter<ContentState> emit) {
@@ -33,6 +35,22 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
       emit(ContentLoaded(
         touchpoints: contentLoaded.touchpoints,
         selectedTouchpoint: event.touchpoint,
+      ));
+    }
+  }
+
+  void _onCreateTouchpoint(ContentEventCreateTouchpoint event, Emitter<ContentState> emit) async {
+    if (state is ContentLoaded) {
+      final contentLoaded = state as ContentLoaded;
+
+      final touchpoint = await contentApi.createTouchpoint(MTouchpoint(
+        type: event.type,
+      ));
+
+      final touchpoints = contentLoaded.touchpoints + [touchpoint];
+      emit(contentLoaded.copyWith(
+        touchpoints: touchpoints,
+        selectedTouchpoint: touchpoint,
       ));
     }
   }

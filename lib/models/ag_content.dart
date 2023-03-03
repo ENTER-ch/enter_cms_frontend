@@ -11,6 +11,8 @@ class MAGContent with _$MAGContent {
     required AGContentType type,
     String? label,
     String? language,
+    @JsonKey(name: 'media_track_id')
+    int? mediaTrackId,
     @JsonKey(name: 'needs_release')
     bool? needsRelease,
   }) = _MAGContent;

@@ -32,6 +32,20 @@ class ContentEventSelectTouchpoint extends ContentEvent {
   String toString() => 'ContentEventSelectTouchpoint(${touchpoint?.id})';
 }
 
+class ContentEventCreateTouchpoint extends ContentEvent {
+  const ContentEventCreateTouchpoint({
+    required this.type,
+  });
+
+  final TouchpointType type;
+
+  @override
+  List<Object> get props => [type];
+
+  @override
+  String toString() => 'ContentEventCreateTouchpoint(${type})';
+}
+
 class ContentEventUpdateTouchpoint extends ContentEvent {
   const ContentEventUpdateTouchpoint({
     required this.touchpoint,

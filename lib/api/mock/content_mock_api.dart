@@ -66,6 +66,7 @@ class ContentMockApi extends ContentApi {
           type: AGContentType.audio,
           label: 'AG Content 1',
           language: 'de',
+          mediaTrackId: 1,
         ),
         MAGContent(
           id: 2,
@@ -154,8 +155,12 @@ class ContentMockApi extends ContentApi {
 
   @override
   Future<MTouchpoint> createTouchpoint(MTouchpoint touchpoint) {
-    _touchpoints.add(touchpoint.copyWith(id: _touchpoints.length + 1));
-    return Future.delayed(_lagDuration, () => touchpoint);
+    final newTouchpoint = touchpoint.copyWith(
+      id: _touchpoints.length + 1,
+      touchpointId: _touchpoints.length + 1,
+    );
+    _touchpoints.add(newTouchpoint);
+    return Future.delayed(_lagDuration, () => newTouchpoint);
   }
 
   @override

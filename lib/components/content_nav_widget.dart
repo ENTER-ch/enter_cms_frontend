@@ -18,7 +18,7 @@ class ContentNavWidget extends StatelessWidget {
       children: [
         _buildHeader(context),
         const Divider(),
-        if (child != null) Expanded(child: child!),
+        if (child != null) child!,
       ],
     );
   }
