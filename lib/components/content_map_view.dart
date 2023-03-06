@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 
-class ContentMapView extends StatelessWidget {
+import '../models/position.dart';
+
+class ContentMapView extends StatefulWidget {
   const ContentMapView({
     Key? key,
     required this.mapBloc,
@@ -16,6 +18,13 @@ class ContentMapView extends StatelessWidget {
   final MapBloc mapBloc;
   final ContentBloc contentBloc;
 
+  @override
+  State<ContentMapView> createState() => _ContentMapViewState();
+}
+
+class _ContentMapViewState extends State<ContentMapView> {
+  Offset? _mousePosition;
+
   bool _isPositionInView(Offset position, vector_math.Quad viewport) {
     return viewport.point0.x <= position.dx &&
         viewport.point1.x >= position.dx &&
@@ -24,7 +33,8 @@ class ContentMapView extends StatelessWidget {
   }
 
   void _selectTouchpoint(MTouchpoint? touchpoint) {
-    contentBloc.add(ContentEventSelectTouchpoint(touchpoint: touchpoint));
+    widget.contentBloc
+        .add(ContentEventSelectTouchpoint(touchpoint: touchpoint));
   }
 
   void _contextBlocListener(BuildContext context, ContentState state) {
@@ -35,10 +45,31 @@ class ContentMapView extends StatelessWidget {
     }
   }
 
+  void _onMapClicked(Offset position) {
+    final state = widget.contentBloc.state;
+    final mapState = widget.mapBloc.state;
+    if (state is ContentLoaded && mapState is MapLoaded) {
+      if (state.intent == ContentIntent.placeTouchpoint) {
+        // Place touchpoint
+        print('Placing touchpoint at $position');
+        widget.contentBloc.add(ContentEventPlaceTouchpoint(
+          touchpoint: state.selectedTouchpoint!,
+          position: MPosition(
+            parentId: mapState.selectedFloorplan!.id,
+            x: position.dx,
+            y: position.dy,
+          ),
+        ));
+        return;
+      }
+    }
+    _selectTouchpoint(null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MapBloc, MapState>(
-      bloc: mapBloc,
+      bloc: widget.mapBloc,
       builder: (context, state) {
         if (state is MapLoaded) {
           return Stack(
@@ -46,8 +77,9 @@ class ContentMapView extends StatelessWidget {
               PanZoomMapView(
                 floorplan: state.selectedFloorplan,
                 overlayBuilder: _buildOverlay,
-                onTap: (position) => _selectTouchpoint(null),
+                onTap: (position) => _onMapClicked(position),
               ),
+              Positioned.fill(child: _buildMouseRegion()),
             ],
           );
         }
@@ -59,7 +91,7 @@ class ContentMapView extends StatelessWidget {
   Widget _buildOverlay(
       BuildContext context, vector_math.Quad viewport, double scale) {
     return BlocConsumer<ContentBloc, ContentState>(
-      bloc: contentBloc,
+      bloc: widget.contentBloc,
       listener: _contextBlocListener,
       builder: (context, state) {
         if (state is ContentLoaded) {
@@ -91,11 +123,13 @@ class ContentMapView extends StatelessWidget {
                       foregroundColor: t.type.color.computeLuminance() > 0.5
                           ? Colors.black
                           : Colors.white,
-                      style: state.selectedTouchpoint == t ? TouchpointMarkerStyle.full : scale > 0.5
+                      style: state.selectedTouchpoint == t
                           ? TouchpointMarkerStyle.full
-                          : scale > 0.2
-                              ? TouchpointMarkerStyle.icon
-                              : TouchpointMarkerStyle.tiny,
+                          : scale > 0.5
+                              ? TouchpointMarkerStyle.full
+                              : scale > 0.2
+                                  ? TouchpointMarkerStyle.icon
+                                  : TouchpointMarkerStyle.tiny,
                     ),
                   ),
                 );
@@ -106,6 +140,53 @@ class ContentMapView extends StatelessWidget {
         return const SizedBox();
       },
     );
+  }
+
+  Widget _buildMouseRegion() {
+    return BlocBuilder<ContentBloc, ContentState>(
+        bloc: widget.contentBloc,
+        builder: (context, state) {
+          if (state is ContentLoaded && state.intent != null) {
+            return MouseRegion(
+              opaque: false,
+              onHover: (event) {
+                setState(() {
+                  _mousePosition = event.localPosition;
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(.2),
+                    width: 8,
+                  )
+                ),
+                child: Stack(
+                  children: [
+                    if (_mousePosition != null &&
+                        state.intent == ContentIntent.placeTouchpoint)
+                      Positioned(
+                          left: _mousePosition!.dx,
+                          top: _mousePosition!.dy,
+                          child: TouchpointMarker(
+                            style: TouchpointMarkerStyle.icon,
+                            icon: state.selectedTouchpoint!.type.icon,
+                            backgroundColor:
+                                state.selectedTouchpoint!.type.color,
+                            foregroundColor: state
+                                        .selectedTouchpoint!.type.color
+                                        .computeLuminance() >
+                                    0.5
+                                ? Colors.black
+                                : Colors.white,
+                          )),
+                  ],
+                ),
+              ),
+            );
+          }
+          return const SizedBox();
+        });
   }
 }
 

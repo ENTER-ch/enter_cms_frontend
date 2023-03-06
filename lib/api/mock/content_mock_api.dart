@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:enter_cms_flutter/api/content_api.dart';
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
@@ -5,9 +7,12 @@ import 'package:enter_cms_flutter/models/mp_content.dart';
 import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/position.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
+import 'package:collection/collection.dart';
+import 'package:logging/logging.dart';
 
 class ContentMockApi extends ContentApi {
   static const _lagDuration = Duration(milliseconds: 250);
+  final _logger = Logger('ContentMockApi');
 
   List<MTouchpoint> _touchpoints = [
     const MTouchpoint(
@@ -58,7 +63,7 @@ class ContentMockApi extends ContentApi {
 
   List<MAGTouchpointConfig> _agTouchpointConfigs = [
     const MAGTouchpointConfig(
-      id: 1,
+      id: 0,
       touchpointId: 1,
       contents: [
         MAGContent(
@@ -77,7 +82,7 @@ class ContentMockApi extends ContentApi {
       ],
     ),
     const MAGTouchpointConfig(
-      id: 2,
+      id: 1,
       touchpointId: 2,
       contents: [
         MAGContent(
@@ -159,6 +164,7 @@ class ContentMockApi extends ContentApi {
       id: _touchpoints.length + 1,
       touchpointId: _touchpoints.length + 1,
     );
+
     _touchpoints.add(newTouchpoint);
     return Future.delayed(_lagDuration, () => newTouchpoint);
   }
@@ -247,13 +253,40 @@ class ContentMockApi extends ContentApi {
   }
 
   @override
-  Future<MAGTouchpointConfig> getAGTouchpointConfigForTouchpoint(
-      {required int touchpointId}) {
-    return Future.delayed(
-      _lagDuration,
-      () => _agTouchpointConfigs
-          .firstWhere((config) => config.touchpointId == touchpointId),
+  Future<MAGTouchpointConfig> getAGTouchpointConfigForTouchpoint({required int touchpointId}) async {
+    var config = _agTouchpointConfigs.firstWhereOrNull(
+      (config) => config.touchpointId == touchpointId,
     );
+
+    if (config == null) {
+      config = MAGTouchpointConfig(touchpointId: touchpointId, contents: [
+        MAGContent(
+          id: Random().nextInt(2^32),
+          type: AGContentType.audio,
+          label: 'Audio DE',
+          language: 'de',
+        ),
+        MAGContent(
+          id: Random().nextInt(2^32),
+          type: AGContentType.audio,
+          label: 'Audio EN',
+          language: 'en',
+        ),
+        MAGContent(
+          id: Random().nextInt(2^32),
+          type: AGContentType.audio,
+          label: 'Audio FR',
+          language: 'fr',
+        ),
+      ]);
+
+      _agTouchpointConfigs
+          .add(config.copyWith(id: _agTouchpointConfigs.length + 1));
+    }
+
+    _logger.info(config);
+
+    return await Future.delayed(_lagDuration, () => config!);
   }
 
   @override
@@ -268,9 +301,8 @@ class ContentMockApi extends ContentApi {
   Future<void> deleteAGContent({required int id}) {
     _agTouchpointConfigs = _agTouchpointConfigs.map((config) {
       config = config.copyWith(
-          contents: config.contents
-              .where((content) => content.id != id)
-              .toList());
+          contents:
+              config.contents.where((content) => content.id != id).toList());
       return config;
     }).toList();
     return Future.delayed(_lagDuration, () {});
@@ -289,7 +321,8 @@ class ContentMockApi extends ContentApi {
   }
 
   @override
-  Future<MAGContent> createAGContent(MAGContent content, {required int touchpointId}) async {
+  Future<MAGContent> createAGContent(MAGContent content,
+      {required int touchpointId}) async {
     var config = _agTouchpointConfigs
         .firstWhere((config) => config.touchpointId == touchpointId);
     config = config.copyWith(contents: [...config.contents, content]);

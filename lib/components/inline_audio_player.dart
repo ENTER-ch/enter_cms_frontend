@@ -36,6 +36,7 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
   void didUpdateWidget(covariant InlineAudioPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.url != widget.url) {
+      _audioPlayer.stop();
       _setUrl(widget.url);
     }
   }
@@ -54,8 +55,10 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
     if (_audioPlayer.state == PlayerState.playing) {
       _audioPlayer.seek(Duration.zero);
       _audioPlayer.stop();
-    } else {
+    } else if (_audioPlayer.state == PlayerState.paused) {
       _audioPlayer.resume();
+    } else {
+      _audioPlayer.play(UrlSource(widget.url));
     }
   }
 

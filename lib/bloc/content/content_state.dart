@@ -1,5 +1,9 @@
 part of 'content_bloc.dart';
 
+enum ContentIntent {
+  placeTouchpoint,
+}
+
 abstract class ContentState extends Equatable {
   const ContentState();
 
@@ -20,25 +24,30 @@ class ContentLoading extends ContentState {
 class ContentLoaded extends ContentState {
   final List<MTouchpoint> touchpoints;
   final MTouchpoint? selectedTouchpoint;
+  final ContentIntent? intent;
 
   const ContentLoaded({
     required this.touchpoints,
     this.selectedTouchpoint,
+    this.intent,
   });
 
   ContentLoaded copyWith({
     List<MTouchpoint>? touchpoints,
     MTouchpoint? selectedTouchpoint,
+    ContentIntent? intent,
+    bool clearIntent = false,
   }) {
     return ContentLoaded(
       touchpoints: touchpoints ?? this.touchpoints,
       selectedTouchpoint: selectedTouchpoint ?? this.selectedTouchpoint,
+      intent: clearIntent ? null : intent ?? this.intent,
     );
   }
 
   @override
-  List<Object?> get props => [touchpoints, selectedTouchpoint];
+  List<Object?> get props => [touchpoints, selectedTouchpoint, intent];
 
   @override
-  String toString() => 'ContentLoaded(${touchpoints.length} touchpoints, selectedTouchpoint: ${selectedTouchpoint?.id})';
+  String toString() => 'ContentLoaded(${touchpoints.length} touchpoints, selectedTouchpoint: ${selectedTouchpoint?.id}), intent: $intent';
 }

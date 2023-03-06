@@ -46,6 +46,22 @@ class ContentEventCreateTouchpoint extends ContentEvent {
   String toString() => 'ContentEventCreateTouchpoint(${type})';
 }
 
+class ContentEventPlaceTouchpoint extends ContentEvent {
+  const ContentEventPlaceTouchpoint({
+    required this.touchpoint,
+    required this.position,
+  });
+
+  final MTouchpoint touchpoint;
+  final MPosition position;
+
+  @override
+  List<Object> get props => [touchpoint, position];
+
+  @override
+  String toString() => 'ContentEventPlaceTouchpoint(${touchpoint.id}, ${position})';
+}
+
 class ContentEventUpdateTouchpoint extends ContentEvent {
   const ContentEventUpdateTouchpoint({
     required this.touchpoint,

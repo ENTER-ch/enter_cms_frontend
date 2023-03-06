@@ -30,8 +30,7 @@ class AGTouchpointConfigBloc extends Bloc<AGTouchpointConfigEvent, AGTouchpointC
       final config = await contentApi.getAGTouchpointConfigForTouchpoint(touchpointId: touchpoint.id!);
       emit(AGTouchpointConfigLoaded(config: config));
     } catch (e) {
-      const config = MAGTouchpointConfig();
-      emit(const AGTouchpointConfigLoaded(config: config));
+      rethrow;
     }
   }
 

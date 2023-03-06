@@ -95,6 +95,7 @@ class _TouchpointEditorWidgetState extends State<TouchpointEditorWidget> {
         const Divider(),
         if (widget.touchpoint?.type == TouchpointType.audioguide)
           AGTouchpointEditor(
+            key: ValueKey(widget.touchpoint?.id),
             touchpoint: widget.touchpoint!,
           ),
       ],

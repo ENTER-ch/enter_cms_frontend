@@ -1,7 +1,6 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:enter_cms_flutter/api/media_api.dart';
 import 'package:enter_cms_flutter/models/media_file.dart';
-import 'package:enter_cms_flutter/models/media_track.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -29,7 +28,6 @@ class MediaUploadDialog extends StatefulWidget {
 class _MediaUploadDialogState extends State<MediaUploadDialog> {
   final _logger = Logger('MediaUploadDialog');
   final _mediaApi = getIt<MediaApi>();
-  get _canPop => false;
 
   XFile? _pickedFile;
 
@@ -84,6 +82,10 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
     }
   }
 
+  Future<bool> get _canPop async {
+    return !_uploading;
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -92,11 +94,11 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
         title: const Text('Upload Media'),
         content: SizedBox(
           width: 400,
-          height: 200,
+          height: 100,
           child: _buildBody(),
         ),
         actions: [
-          TextButton(
+          if (!_uploading && _uploadedFile == null) TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),

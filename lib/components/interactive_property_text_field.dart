@@ -6,6 +6,7 @@ class InteractivePropertyTextField extends StatefulWidget {
   const InteractivePropertyTextField({
     Key? key,
     this.labelText,
+    this.helperText,
     this.maxLines,
     this.initialValue,
     this.onValueChanged,
@@ -15,6 +16,7 @@ class InteractivePropertyTextField extends StatefulWidget {
   }) : super(key: key);
 
   final String? labelText;
+  final String? helperText;
   final int? maxLines;
 
   final String? initialValue;
@@ -98,6 +100,7 @@ class _InteractivePropertyTextFieldState
       child: PropertyTextField(
         controller: _controller,
         labelText: widget.labelText,
+        helperText: widget.helperText,
         errorText: _errorMessage,
         maxLines: widget.maxLines,
         suffix: _buildSuffix(),

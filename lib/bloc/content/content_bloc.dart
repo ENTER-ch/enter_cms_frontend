@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:enter_cms_flutter/api/content_api.dart';
+import 'package:enter_cms_flutter/models/position.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:equatable/equatable.dart';
 
 part 'content_event.dart';
+
 part 'content_state.dart';
 
 class ContentBloc extends Bloc<ContentEvent, ContentState> {
@@ -17,19 +19,23 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     on<ContentEventLoad>(_onLoad);
     on<ContentEventSelectTouchpoint>(_onSelectTouchpoint);
     on<ContentEventCreateTouchpoint>(_onCreateTouchpoint);
+    on<ContentEventPlaceTouchpoint>(_onPlaceTouchpoint);
     on<ContentEventUpdateTouchpoint>(_onUpdateTouchpoint);
   }
 
   void _onLoad(ContentEventLoad event, Emitter<ContentState> emit) async {
     emit(ContentLoading());
 
-    final touchpoints = await contentApi.getTouchpointsOfFloorplan(floorplanId: event.floorplanId);
+    final touchpoints = await contentApi.getTouchpointsOfFloorplan(
+        floorplanId: event.floorplanId);
 
     emit(ContentLoaded(touchpoints: touchpoints));
-    if (touchpoints.isNotEmpty) add(ContentEventSelectTouchpoint(touchpoint: touchpoints.first));
+    if (touchpoints.isNotEmpty)
+      add(ContentEventSelectTouchpoint(touchpoint: touchpoints.first));
   }
 
-  void _onSelectTouchpoint(ContentEventSelectTouchpoint event, Emitter<ContentState> emit) {
+  void _onSelectTouchpoint(
+      ContentEventSelectTouchpoint event, Emitter<ContentState> emit) {
     if (state is ContentLoaded) {
       final ContentLoaded contentLoaded = state as ContentLoaded;
       emit(ContentLoaded(
@@ -39,7 +45,8 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     }
   }
 
-  void _onCreateTouchpoint(ContentEventCreateTouchpoint event, Emitter<ContentState> emit) async {
+  void _onCreateTouchpoint(
+      ContentEventCreateTouchpoint event, Emitter<ContentState> emit) async {
     if (state is ContentLoaded) {
       final contentLoaded = state as ContentLoaded;
 
@@ -49,19 +56,38 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
 
       final touchpoints = contentLoaded.touchpoints + [touchpoint];
       emit(contentLoaded.copyWith(
+        intent: ContentIntent.placeTouchpoint,
         touchpoints: touchpoints,
         selectedTouchpoint: touchpoint,
       ));
     }
   }
 
-  void _onUpdateTouchpoint(ContentEventUpdateTouchpoint event, Emitter<ContentState> emit) async {
+  void _onPlaceTouchpoint(ContentEventPlaceTouchpoint event, Emitter<ContentState> emit) async {
     if (state is ContentLoaded) {
       final contentLoaded = state as ContentLoaded;
-      final touchpoints = contentLoaded.touchpoints.map((e) => e.id == event.touchpoint.id ? event.touchpoint : e).toList();
+      emit(contentLoaded.copyWith(
+        clearIntent: true,
+      ));
+
+      add(ContentEventUpdateTouchpoint(
+          touchpoint: event.touchpoint.copyWith(
+        position: event.position,
+      )));
+    }
+  }
+
+  void _onUpdateTouchpoint(
+      ContentEventUpdateTouchpoint event, Emitter<ContentState> emit) async {
+    if (state is ContentLoaded) {
+      final contentLoaded = state as ContentLoaded;
+      final touchpoints = contentLoaded.touchpoints
+          .map((e) => e.id == event.touchpoint.id ? event.touchpoint : e)
+          .toList();
       emit(contentLoaded.copyWith(
         touchpoints: touchpoints,
-        selectedTouchpoint: touchpoints.firstWhere((e) => e.id == event.touchpoint.id),
+        selectedTouchpoint:
+            touchpoints.firstWhere((e) => e.id == event.touchpoint.id),
       ));
     }
   }

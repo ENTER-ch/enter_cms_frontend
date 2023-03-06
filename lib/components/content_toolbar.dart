@@ -21,6 +21,7 @@ class ContentToolbar extends StatelessWidget {
     return Row(children: [
       ToolbarButton(
         icon: Icons.headphones,
+        label: 'Create Audioguide',
         tooltipText: 'Create Audioguide Touchpoint',
         onTap: () => _onCreateTouchpoint(context, TouchpointType.audioguide),
       ),
