@@ -1,22 +1,15 @@
 import 'package:cross_file/cross_file.dart';
+import 'package:enter_cms_flutter/api/cms_api.dart';
 import 'package:enter_cms_flutter/api/media_api.dart';
+import 'package:enter_cms_flutter/components/inline_audio_player.dart';
 import 'package:enter_cms_flutter/models/media_file.dart';
+import 'package:enter_cms_flutter/models/media_track.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 
 final GetIt getIt = GetIt.instance;
-
-class MediaUploadResult {
-  const MediaUploadResult({
-    required this.file,
-    this.streamId,
-  });
-
-  final MMediaFile file;
-  final int? streamId;
-}
 
 class MediaUploadDialog extends StatefulWidget {
   const MediaUploadDialog({Key? key}) : super(key: key);
@@ -27,14 +20,14 @@ class MediaUploadDialog extends StatefulWidget {
 
 class _MediaUploadDialogState extends State<MediaUploadDialog> {
   final _logger = Logger('MediaUploadDialog');
-  final _mediaApi = getIt<MediaApi>();
+  final _cmsApi = getIt.get<CmsApi>();
 
   XFile? _pickedFile;
 
   bool _uploading = false;
   double _uploadProgress = 0.0;
 
-  MMediaFile? _uploadedFile;
+  List<MMediaTrack> _uploadedTracks = [];
 
   void _onPickFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -57,7 +50,8 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
       _uploading = true;
     });
 
-    final result = await _mediaApi.uploadFile(_pickedFile!, onProgress: (sent, total) {
+    final result =
+        await _cmsApi.uploadMediaFile(_pickedFile!, onProgress: (sent, total) {
       _logger.info("Upload progress: $sent/$total");
       setState(() {
         _uploadProgress = sent / total;
@@ -66,20 +60,20 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
 
     setState(() {
       _uploading = false;
-      _uploadedFile = result;
+      _uploadedTracks.addAll(result);
     });
     _onUploaded();
   }
 
   void _onUploaded() {
-    if (_uploadedFile != null) {
-      if (_uploadedFile!.mediaInfo?['streams']?.length == 1) {
-        Navigator.of(context).pop(MediaUploadResult(
-          file: _uploadedFile!,
-          streamId: 0,
-        ));
-      }
-    }
+    // if (_uploadedFile != null) {
+    //   if (_uploadedFile!.mediaInfo?['streams']?.length == 1) {
+    //     Navigator.of(context).pop(MediaUploadResult(
+    //       file: _uploadedFile!,
+    //       streamId: 0,
+    //     ));
+    //   }
+    // }
   }
 
   Future<bool> get _canPop async {
@@ -93,15 +87,16 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
       child: AlertDialog(
         title: const Text('Upload Media'),
         content: SizedBox(
-          width: 400,
-          height: 100,
+          width: 450,
+          height: 400,
           child: _buildBody(),
         ),
         actions: [
-          if (!_uploading && _uploadedFile == null) TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
+          if (!_uploading)
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
         ],
       ),
     );
@@ -128,9 +123,39 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
         ),
       );
     }
-    if (_uploadedFile != null) {
-
+    if (_uploadedTracks.isNotEmpty) {
+      return ListView.builder(
+        itemBuilder: (context, index) {
+          final track = _uploadedTracks[index];
+          return _buildTrackPreviewListTile(track);
+        },
+        itemCount: _uploadedTracks.length,
+      );
     }
     return const SizedBox();
+  }
+
+  Widget _buildTrackPreviewListTile(MMediaTrack track) {
+    return Card(
+      clipBehavior: Clip.hardEdge,
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(track.type.icon),
+            title: Text("Track ${track.index + 1}"),
+            trailing: Text(track.language?.toUpperCase() ?? "?"),
+            onTap: () {
+              Navigator.of(context).pop(track);
+            },
+          ),
+          if (track.type == MediaType.audio && track.previewUrl != null) Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InlineAudioPlayer(
+                url: track.previewUrl!,
+              ),
+          ),
+        ],
+      ),
+    );
   }
 }

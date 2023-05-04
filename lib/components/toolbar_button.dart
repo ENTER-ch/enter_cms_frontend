@@ -20,6 +20,7 @@ class ToolbarButton extends StatelessWidget {
     return _buildTooltip(
       context,
       child: Material(
+        color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           child: Padding(

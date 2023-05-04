@@ -24,7 +24,7 @@ class MediaMockApi extends MediaApi {
     MMediaTrack(
       id: 1,
       type: MediaType.audio,
-      streamId: 0,
+      index: 0,
       source: 1,
       filename: 'ag_test_content.wav',
       previewUrl: '/mock_data/media/ag_test_content.wav',

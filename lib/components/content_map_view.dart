@@ -1,6 +1,7 @@
 import 'package:enter_cms_flutter/bloc/content/content_bloc.dart';
 import 'package:enter_cms_flutter/bloc/map/map_bloc.dart';
 import 'package:enter_cms_flutter/components/pan_zoom_map_view.dart';
+import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -102,8 +103,23 @@ class _ContentMapViewState extends State<ContentMapView> {
             return _isPositionInView(touchpoint.position!.toOffset(), viewport);
           });
 
+          final filteredBeacons = state.beacons.where((beacon) {
+            return _isPositionInView(beacon.position.toOffset(), viewport);
+          });
+
           return Stack(
             children: [
+              ...filteredBeacons.map((b) {
+                final offset = b.position.toOffset();
+                return Positioned(
+                  key: ValueKey("beacon-${b.beaconId}"),
+                  left: offset.dx,
+                  top: offset.dy,
+                  child: BeaconMarker(
+                    beacon: b,
+                  ),
+                );
+              }),
               ...filteredTouchpoints.map((t) {
                 final offset = t.position!.toOffset();
                 return Positioned(
@@ -112,24 +128,28 @@ class _ContentMapViewState extends State<ContentMapView> {
                   top: offset.dy,
                   child: Transform.scale(
                     scale: 1 / scale,
-                    child: TouchpointMarker(
-                      onTap: () => _selectTouchpoint(t),
-                      label: t.touchpointId != null
-                          ? t.touchpointId!.toString().padLeft(3, '0')
-                          : 'XXX',
-                      tooltip: t.internalTitle,
-                      icon: t.type.icon,
-                      backgroundColor: t.type.color,
-                      foregroundColor: t.type.color.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
-                      style: state.selectedTouchpoint == t
-                          ? TouchpointMarkerStyle.full
-                          : scale > 0.5
-                              ? TouchpointMarkerStyle.full
-                              : scale > 0.2
-                                  ? TouchpointMarkerStyle.icon
-                                  : TouchpointMarkerStyle.tiny,
+                    alignment: Alignment.center,
+                    child: Transform.translate(
+                      offset: Offset(-74 / 2 * scale, -34 / 2 * scale),
+                      child: TouchpointMarker(
+                        onTap: () => _selectTouchpoint(t),
+                        label: t.touchpointId != null
+                            ? t.touchpointId!.toString().padLeft(3, '0')
+                            : 'XXX',
+                        tooltip: t.internalTitle,
+                        icon: t.type.icon,
+                        backgroundColor: t.type.color,
+                        foregroundColor: t.type.color.computeLuminance() > 0.5
+                            ? Colors.black
+                            : Colors.white,
+                        style: state.selectedTouchpoint == t
+                            ? TouchpointMarkerStyle.full
+                            : scale > 0.5
+                                ? TouchpointMarkerStyle.full
+                                : scale > 0.2
+                                    ? TouchpointMarkerStyle.icon
+                                    : TouchpointMarkerStyle.tiny,
+                      ),
                     ),
                   ),
                 );
@@ -156,29 +176,31 @@ class _ContentMapViewState extends State<ContentMapView> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(.2),
-                    width: 8,
-                  )
-                ),
+                    border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(.2),
+                  width: 8,
+                )),
                 child: Stack(
                   children: [
                     if (_mousePosition != null &&
                         state.intent == ContentIntent.placeTouchpoint)
                       Positioned(
-                          left: _mousePosition!.dx,
-                          top: _mousePosition!.dy,
-                          child: TouchpointMarker(
-                            style: TouchpointMarkerStyle.icon,
-                            icon: state.selectedTouchpoint!.type.icon,
-                            backgroundColor:
-                                state.selectedTouchpoint!.type.color,
-                            foregroundColor: state
-                                        .selectedTouchpoint!.type.color
-                                        .computeLuminance() >
-                                    0.5
-                                ? Colors.black
-                                : Colors.white,
+                          left: _mousePosition!.dx - 8,
+                          top: _mousePosition!.dy - 8,
+                          child: Transform.translate(
+                            offset: const Offset(-74 / 2, -34 / 2),
+                            child: TouchpointMarker(
+                              style: TouchpointMarkerStyle.icon,
+                              icon: state.selectedTouchpoint!.type.icon,
+                              backgroundColor:
+                                  state.selectedTouchpoint!.type.color,
+                              foregroundColor: state
+                                          .selectedTouchpoint!.type.color
+                                          .computeLuminance() >
+                                      0.5
+                                  ? Colors.black
+                                  : Colors.white,
+                            ),
                           )),
                   ],
                 ),
@@ -259,27 +281,33 @@ class TouchpointMarker extends StatelessWidget {
   }
 
   Widget _buildContainer(BuildContext context, {Widget? child}) {
-    return AnimatedContainer(
-      duration: _styleTransitionDuration,
-      width: sizes[style]!.width,
-      height: sizes[style]!.height,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: _getForegroundColor(context),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Material(
-        type: MaterialType.button,
-        color: _getBackgroundColor(context),
-        borderRadius: BorderRadius.circular(24),
-        clipBehavior: Clip.hardEdge,
-        child: InkWell(
-          onTap: onTap,
-          child: FittedBox(
-            alignment: Alignment.center,
-            child: child,
+    return SizedBox(
+      width: 74,
+      height: 34,
+      child: Center(
+        child: AnimatedContainer(
+          duration: _styleTransitionDuration,
+          width: sizes[style]!.width,
+          height: sizes[style]!.height,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: _getForegroundColor(context),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Material(
+            type: MaterialType.button,
+            color: _getBackgroundColor(context),
+            borderRadius: BorderRadius.circular(24),
+            clipBehavior: Clip.hardEdge,
+            child: InkWell(
+              onTap: onTap,
+              child: FittedBox(
+                alignment: Alignment.center,
+                child: child,
+              ),
+            ),
           ),
         ),
       ),
@@ -314,10 +342,39 @@ class TouchpointMarker extends StatelessWidget {
               child: Text(label!,
                   style: Theme.of(context)
                       .textTheme
-                      .titleSmall!
+                      .titleMedium!
                       .copyWith(color: _getForegroundColor(context))),
             )
           : const SizedBox(),
+    );
+  }
+}
+
+class BeaconMarker extends StatelessWidget {
+  const BeaconMarker({
+    Key? key,
+    required this.beacon,
+  }) : super(key: key);
+
+  final MBeacon beacon;
+
+  @override
+  Widget build(BuildContext context) {
+    final double radius = beacon.radius ?? 200.0;
+    return Transform.translate(
+      offset: Offset(-radius / 2, -radius / 2),
+      child: Container(
+        width: radius,
+        height: radius,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.error.withOpacity(.2),
+            width: 8,
+          ),
+          color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+        ),
+      ),
     );
   }
 }

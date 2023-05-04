@@ -1,9 +1,17 @@
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
+import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 
 abstract class ContentApi {
+  Future<List<MBeacon>> getBeacons();
+  Future<List<MBeacon>> getBeaconsOfFloorplan({required int floorplanId});
+  Future<MBeacon> getBeacon({required String beaconId});
+  Future<MBeacon> createBeacon(MBeacon beacon);
+  Future<MBeacon> updateBeacon(MBeacon beacon);
+  Future<void> deleteBeacon({required String beaconId});
+
   Future<List<MTouchpoint>> getTouchpoints();
   Future<List<MTouchpoint>> getTouchpointsOfFloorplan({required int floorplanId});
   Future<MTouchpoint> getTouchpoint({required int id});

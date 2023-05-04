@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:enter_cms_flutter/api/content_api.dart';
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
+import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/mp_content.dart';
 import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/position.dart';
@@ -68,14 +69,12 @@ class ContentMockApi extends ContentApi {
       contents: [
         MAGContent(
           id: 1,
-          type: AGContentType.audio,
           label: 'AG Content 1',
           language: 'de',
           mediaTrackId: 1,
         ),
         MAGContent(
           id: 2,
-          type: AGContentType.audio,
           label: 'AG Content 2',
           language: 'en',
         ),
@@ -87,13 +86,11 @@ class ContentMockApi extends ContentApi {
       contents: [
         MAGContent(
           id: 3,
-          type: AGContentType.audio,
           label: 'AG Content 3',
           language: 'de',
         ),
         MAGContent(
           id: 4,
-          type: AGContentType.audio,
           label: 'AG Content 4',
           language: 'en',
         ),
@@ -136,6 +133,18 @@ class ContentMockApi extends ContentApi {
     ),
   ];
 
+  late List<MBeacon> _beacons;
+
+  ContentMockApi() {
+    _beacons = _touchpoints
+        .where((t) => t.position != null)
+        .map((t) => MBeacon(
+            beaconId: t.id.toString(),
+            touchpoint: t,
+            position: t.position!))
+        .toList();
+  }
+
   @override
   Future<List<MTouchpoint>> getTouchpoints() {
     return Future.delayed(
@@ -155,6 +164,26 @@ class ContentMockApi extends ContentApi {
     _touchpoints = _touchpoints
         .map((t) => t.id == touchpoint.id ? touchpoint : t)
         .toList();
+
+    if (touchpoint.position != null) {
+      final beacon = _beacons.firstWhereOrNull(
+        (b) => b.touchpoint.id == touchpoint.id,
+      );
+      if (beacon != null) {
+        _beacons = _beacons
+            .map((b) => b.touchpoint.id == touchpoint.id
+                ? beacon.copyWith(position: touchpoint.position!)
+                : b)
+            .toList();
+      } else {
+        _beacons.add(MBeacon(
+          beaconId: touchpoint.id.toString(),
+          touchpoint: touchpoint,
+          position: touchpoint.position!,
+        ));
+      }
+    }
+
     return Future.delayed(_lagDuration, () => touchpoint);
   }
 
@@ -166,6 +195,15 @@ class ContentMockApi extends ContentApi {
     );
 
     _touchpoints.add(newTouchpoint);
+
+    if (newTouchpoint.position != null) {
+      createBeacon(MBeacon(
+        beaconId: newTouchpoint.id.toString(),
+        touchpoint: newTouchpoint,
+        position: newTouchpoint.position!,
+      ));
+    }
+
     return Future.delayed(_lagDuration, () => newTouchpoint);
   }
 
@@ -253,7 +291,8 @@ class ContentMockApi extends ContentApi {
   }
 
   @override
-  Future<MAGTouchpointConfig> getAGTouchpointConfigForTouchpoint({required int touchpointId}) async {
+  Future<MAGTouchpointConfig> getAGTouchpointConfigForTouchpoint(
+      {required int touchpointId}) async {
     var config = _agTouchpointConfigs.firstWhereOrNull(
       (config) => config.touchpointId == touchpointId,
     );
@@ -261,20 +300,17 @@ class ContentMockApi extends ContentApi {
     if (config == null) {
       config = MAGTouchpointConfig(touchpointId: touchpointId, contents: [
         MAGContent(
-          id: Random().nextInt(2^32),
-          type: AGContentType.audio,
+          id: Random().nextInt(2 ^ 32),
           label: 'Audio DE',
           language: 'de',
         ),
         MAGContent(
-          id: Random().nextInt(2^32),
-          type: AGContentType.audio,
+          id: Random().nextInt(2 ^ 32),
           label: 'Audio EN',
           language: 'en',
         ),
         MAGContent(
-          id: Random().nextInt(2^32),
-          type: AGContentType.audio,
+          id: Random().nextInt(2 ^ 32),
           label: 'Audio FR',
           language: 'fr',
         ),
@@ -339,5 +375,44 @@ class ContentMockApi extends ContentApi {
           .expand((contents) => contents)
           .firstWhere((content) => content.id == id),
     );
+  }
+
+  @override
+  Future<void> deleteBeacon({required String beaconId}) async {
+    _beacons.removeWhere((beacon) => beacon.beaconId == beaconId);
+    return Future.delayed(_lagDuration, () {});
+  }
+
+  @override
+  Future<MBeacon> updateBeacon(MBeacon beacon) {
+    _beacons = _beacons.map((b) => b.beaconId == beacon.beaconId ? beacon : b).toList();
+    return Future.delayed(_lagDuration, () => beacon);
+  }
+
+  @override
+  Future<MBeacon> createBeacon(MBeacon beacon) {
+    _beacons.add(beacon);
+    return Future.delayed(_lagDuration, () => beacon);
+  }
+
+  @override
+  Future<MBeacon> getBeacon({required String beaconId}) {
+    return Future.delayed(
+        _lagDuration,
+        () => _beacons.firstWhere((beacon) => beacon.beaconId == beaconId));
+  }
+
+  @override
+  Future<List<MBeacon>> getBeaconsOfFloorplan({required int floorplanId}) {
+    return Future.delayed(
+        _lagDuration,
+        () => _beacons
+            .where((beacon) => beacon.touchpoint.position?.parentId == floorplanId)
+            .toList());
+  }
+
+  @override
+  Future<List<MBeacon>> getBeacons() {
+    return Future.delayed(_lagDuration, () => _beacons);
   }
 }

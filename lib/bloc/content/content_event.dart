@@ -10,12 +10,14 @@ abstract class ContentEvent extends Equatable {
 class ContentEventLoad extends ContentEvent {
   const ContentEventLoad({
     required this.floorplanId,
+    this.touchpointId,
   });
 
   final int floorplanId;
+  final int? touchpointId;
 
   @override
-  List<Object> get props => [floorplanId];
+  List<Object?> get props => [floorplanId, touchpointId];
 }
 
 class ContentEventSelectTouchpoint extends ContentEvent {
@@ -65,13 +67,15 @@ class ContentEventPlaceTouchpoint extends ContentEvent {
 class ContentEventUpdateTouchpoint extends ContentEvent {
   const ContentEventUpdateTouchpoint({
     required this.touchpoint,
+    this.internal = false,
   });
 
   final MTouchpoint touchpoint;
+  final bool internal;
 
   @override
-  List<Object> get props => [touchpoint];
+  List<Object> get props => [touchpoint, internal];
 
   @override
-  String toString() => 'ContentEventUpdateTouchpoint(${touchpoint.id})';
+  String toString() => 'ContentEventUpdateTouchpoint(${touchpoint.id}, INTERNAL: ${internal})';
 }

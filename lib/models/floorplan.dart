@@ -1,3 +1,5 @@
+import 'package:enter_cms_flutter/models/beacon.dart';
+import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'floorplan.freezed.dart';

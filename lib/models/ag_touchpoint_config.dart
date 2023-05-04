@@ -6,10 +6,13 @@ part 'ag_touchpoint_config.g.dart';
 
 @freezed
 class MAGTouchpointConfig with _$MAGTouchpointConfig {
+  const MAGTouchpointConfig._();
+
   const factory MAGTouchpointConfig({
     int? id,
     @JsonKey(name: 'touchpoint_id')
     int? touchpointId,
+    bool? dirty,
     @Default([])
     List<MAGContent> contents,
     @JsonKey(name: 'playback_mode')
@@ -21,6 +24,12 @@ class MAGTouchpointConfig with _$MAGTouchpointConfig {
 
   factory MAGTouchpointConfig.fromJson(Map<String, dynamic> json) =>
       _$MAGTouchpointConfigFromJson(json);
+
+  MAGTouchpointConfig replaceContent(MAGContent content) {
+    return copyWith(
+      contents: contents.map((c) => c.id == content.id ? content : c).toList(),
+    );
+  }
 }
 
 enum AGPlaybackMode {
@@ -40,6 +49,17 @@ extension AGPlaybackModeExtension on AGPlaybackMode {
         return 'Auto Loop';
       case AGPlaybackMode.prompt:
         return 'Prompt';
+    }
+  }
+
+  String get jsonValue {
+    switch (this) {
+      case AGPlaybackMode.autoSingle:
+        return 'auto_single';
+      case AGPlaybackMode.autoLoop:
+        return 'auto_loop';
+      case AGPlaybackMode.prompt:
+        return 'prompt';
     }
   }
 }

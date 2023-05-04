@@ -9,6 +9,8 @@ class InteractivePropertyDropdownField extends StatefulWidget {
     this.labelText,
     this.helperText,
     this.onValidate,
+    this.loading,
+    this.errorMessage,
     required this.onSave,
   }) : super(key: key);
 
@@ -19,6 +21,8 @@ class InteractivePropertyDropdownField extends StatefulWidget {
 
   final Future<String?> Function(dynamic initialValue)? onValidate;
   final Future<void> Function(dynamic value) onSave;
+  final bool? loading;
+  final String? errorMessage;
 
   @override
   State<InteractivePropertyDropdownField> createState() => _InteractivePropertyDropdownFieldState();
@@ -41,6 +45,16 @@ class _InteractivePropertyDropdownFieldState extends State<InteractivePropertyDr
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialValue != widget.initialValue) {
       _initForm();
+    }
+    if (widget.loading != null) {
+      setState(() {
+        _isLoading = widget.loading!;
+      });
+    }
+    if (widget.errorMessage != null) {
+      setState(() {
+        _errorMessage = widget.errorMessage;
+      });
     }
   }
 

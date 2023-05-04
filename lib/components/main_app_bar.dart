@@ -1,4 +1,5 @@
 import 'package:enter_cms_flutter/components/enter_logo.dart';
+import 'package:enter_cms_flutter/components/user_menu.dart';
 import 'package:flutter/material.dart';
 
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -11,7 +12,12 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       toolbarHeight: _toolbarHeight,
       title: _buildTitle(context),
+      actions: const [
+        UserMenu(),
+        SizedBox(width: 4),
+      ],
       centerTitle: false,
+      titleSpacing: 8,
     );
   }
 
@@ -23,7 +29,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       const SizedBox(width: 16),
       Text(
-        'Content Management System',
+        'CMS',
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
           color: Theme.of(context).primaryTextTheme.titleMedium?.color,
         ),

@@ -8,10 +8,14 @@ abstract class MapEvent extends Equatable {
 }
 
 class MapEventLoad extends MapEvent {
-  const MapEventLoad();
+  final int? floorplanId;
+
+  const MapEventLoad({
+    this.floorplanId,
+  });
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [floorplanId];
 }
 
 class MapEventSelectFloorplan extends MapEvent {

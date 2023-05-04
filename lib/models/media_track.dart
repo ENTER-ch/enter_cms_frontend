@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'media_track.freezed.dart';
@@ -8,12 +9,13 @@ class MMediaTrack with _$MMediaTrack {
   const factory MMediaTrack({
     int? id,
     required MediaType type,
+    @JsonKey(name: 'media_file')
     int? source,
     String? language,
     @JsonKey(name: 'file_name')
     String? filename,
-    @JsonKey(name: 'stream_id')
-    required int streamId,
+    @JsonKey(name: 'index')
+    required int index,
     @JsonKey(name: 'preview_url')
     String? previewUrl,
   }) = _MMediaTrack;
@@ -33,6 +35,15 @@ extension MediaTypeExtension on MediaType {
         return 'Audio';
       case MediaType.video:
         return 'Video';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case MediaType.audio:
+        return Icons.audiotrack;
+      case MediaType.video:
+        return Icons.videocam;
     }
   }
 }

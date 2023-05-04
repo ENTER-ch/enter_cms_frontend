@@ -12,6 +12,8 @@ class InteractivePropertyTextField extends StatefulWidget {
     this.onValueChanged,
     this.onValidate,
     this.controller,
+    this.loading,
+    this.error,
     required this.onSave,
   }) : super(key: key);
 
@@ -23,6 +25,8 @@ class InteractivePropertyTextField extends StatefulWidget {
   final Future<void> Function(String value)? onValueChanged;
   final Future<String?> Function(String value)? onValidate;
   final Future<void> Function(String value) onSave;
+  final bool? loading;
+  final String? error;
 
   final TextEditingController? controller;
 
@@ -55,6 +59,16 @@ class _InteractivePropertyTextFieldState
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialValue != widget.initialValue) {
       _initForm();
+    }
+    if (widget.loading != null) {
+      setState(() {
+        _isLoading = widget.loading!;
+      });
+    }
+    if (widget.error != null) {
+      setState(() {
+        _errorMessage = widget.error;
+      });
     }
   }
 

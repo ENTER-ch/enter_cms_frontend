@@ -1,6 +1,8 @@
+import 'package:enter_cms_flutter/api/cms_api.dart';
 import 'package:enter_cms_flutter/api/content_api.dart';
 import 'package:enter_cms_flutter/api/media_api.dart';
 import 'package:enter_cms_flutter/bloc/ag_touchpoint_config/ag_touchpoint_config_bloc.dart';
+import 'package:enter_cms_flutter/bloc/touchpoint_editor/touchpoint_editor_bloc.dart';
 import 'package:enter_cms_flutter/components/ag_content_preview.dart';
 import 'package:enter_cms_flutter/components/content_nav_widget.dart';
 import 'package:enter_cms_flutter/components/inline_audio_player.dart';
@@ -20,59 +22,24 @@ import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
-class AGTouchpointEditor extends StatefulWidget {
+class AGTouchpointEditor extends StatelessWidget {
   const AGTouchpointEditor({
     Key? key,
-    required this.touchpoint,
+    required this.touchpointEditorBloc,
   }) : super(key: key);
 
-  final MTouchpoint touchpoint;
-
-  @override
-  State<AGTouchpointEditor> createState() => _AGTouchpointEditorState();
-}
-
-class _AGTouchpointEditorState extends State<AGTouchpointEditor> {
-  late AGTouchpointConfigBloc _configBloc;
-
-  @override
-  void initState() {
-    super.initState();
-    _initBloc();
-  }
-
-  @override
-  void didUpdateWidget(covariant AGTouchpointEditor oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.touchpoint != widget.touchpoint) {
-      _initBloc();
-    }
-  }
-
-  void _initBloc() {
-    _configBloc = AGTouchpointConfigBloc(
-      contentApi: getIt<ContentApi>(),
-      touchpoint: widget.touchpoint,
-    );
-    _configBloc.add(const AGTouchpointConfigEventInit());
-  }
+  final TouchpointEditorBloc touchpointEditorBloc;
 
   @override
   Widget build(BuildContext context) {
     return ContentNavWidget(
       title: const Text('Audioguide'),
-      child: BlocBuilder<AGTouchpointConfigBloc, AGTouchpointConfigState>(
-        bloc: _configBloc,
+      child: BlocBuilder<TouchpointEditorBloc, TouchpointEditorState>(
+        bloc: touchpointEditorBloc,
         builder: (context, state) {
-          if (state is AGTouchpointConfigLoading) {
-            return const Column(
-              children: [
-                LinearProgressIndicator(),
-              ],
-            );
-          }
+          if (state is TouchpointEditorLoaded) {
+            final config = state.touchpoint.agConfig!;
 
-          if (state is AGTouchpointConfigLoaded) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -80,8 +47,10 @@ class _AGTouchpointEditorState extends State<AGTouchpointEditor> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   child: InteractivePropertyDropdownField(
-                    initialValue: state.config.playbackMode,
+                    initialValue: config.playbackMode,
                     labelText: 'Play Mode',
+                    loading: state.configLoading,
+                    errorMessage: state.configError,
                     items: [
                       DropdownMenuItem(
                           value: AGPlaybackMode.autoLoop,
@@ -100,14 +69,17 @@ class _AGTouchpointEditorState extends State<AGTouchpointEditor> {
                       return null;
                     },
                     onSave: (value) async {
-                      _configBloc.add(AGTouchpointConfigEventUpdateConfig(
-                          config: state.config.copyWith(playbackMode: value)));
+                      touchpointEditorBloc.add(
+                        TouchpointEditorEventUpdateAGTouchpointConfig(
+                          playbackMode: value!,
+                        ),
+                      );
                     },
                   ),
                 ),
                 ListView.builder(
                   shrinkWrap: true,
-                  itemCount: state.config.contents.length,
+                  itemCount: config.contents.length,
                   itemBuilder: (context, index) {
                     return ListTileTheme(
                       dense: true,
@@ -122,27 +94,26 @@ class _AGTouchpointEditorState extends State<AGTouchpointEditor> {
                         //   size: 16,
                         // ),
                         trailing: Text(
-                          state.config.contents[index].language
-                                  ?.toUpperCase() ??
-                              '?',
+                          config.contents[index].language?.toUpperCase() ?? '?',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         title: Text(
-                          (state.config.contents[index].label ?? '')
+                          (config.contents[index].label ?? '')
                               .replaceAll('\n', ' '),
                           overflow: TextOverflow.fade,
                           softWrap: false,
                         ),
                         children: [
                           AGContentEditor(
-                              configBloc: _configBloc,
-                              content: state.config.contents[index]),
+                            key: ValueKey(config.contents[index].id),
+                            touchpointEditorBloc: touchpointEditorBloc,
+                            index: index,
+                          ),
                         ],
                       ),
                     );
                   },
                 ),
-
               ],
             );
           }
@@ -156,12 +127,12 @@ class _AGTouchpointEditorState extends State<AGTouchpointEditor> {
 class AGContentEditor extends StatefulWidget {
   const AGContentEditor({
     Key? key,
-    required this.configBloc,
-    required this.content,
+    required this.touchpointEditorBloc,
+    required this.index,
   }) : super(key: key);
 
-  final AGTouchpointConfigBloc configBloc;
-  final MAGContent content;
+  final TouchpointEditorBloc touchpointEditorBloc;
+  final int index;
 
   @override
   State<AGContentEditor> createState() => _AGContentEditorState();
@@ -177,29 +148,37 @@ class _AGContentEditorState extends State<AGContentEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _buildForm(),
-        ),
-      ],
+    return BlocBuilder<TouchpointEditorBloc, TouchpointEditorState>(
+      bloc: widget.touchpointEditorBloc,
+      builder: (context, state) {
+        if (state is TouchpointEditorLoaded) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildForm(state),
+          );
+        }
+        return const SizedBox();
+      }
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildForm(TouchpointEditorLoaded state) {
+    final touchpoint = state.touchpoint;
+    final content = touchpoint.agConfig!.contents[widget.index];
+
     return Column(
+      key: ValueKey(content.id),
       children: [
         SizedBox(
           width: 120,
           child: AGContentPreview(
-            touchpointId: widget.configBloc.touchpoint.id,
-            content: widget.content.copyWith(label: _labelValue),
+            touchpointId: touchpoint.touchpointId,
+            content: content.copyWith(label: _labelValue),
           ),
         ),
         const SizedBox(height: 8),
         InteractivePropertyTextField(
-          initialValue: widget.content.label,
+          initialValue: content.label,
           labelText: 'Label',
           onValueChanged: (value) async {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -215,13 +194,14 @@ class _AGContentEditorState extends State<AGContentEditor> {
             return null;
           },
           onSave: (value) async {
-            widget.configBloc.add(AGTouchpointConfigEventUpdateContent(
-                content: widget.content.copyWith(label: value)));
+            widget.touchpointEditorBloc.add(TouchpointEditorEventUpdateAGContent(
+              content.id!,
+              label: value,
+            ));
           },
-          //maxLines: 5,
         ),
         InteractivePropertyDropdownField(
-          initialValue: widget.content.language,
+          initialValue: content.language,
           labelText: 'Language',
           items: const [
             DropdownMenuItem(value: 'de', child: Text('Deutsch')),
@@ -235,18 +215,24 @@ class _AGContentEditorState extends State<AGContentEditor> {
             return null;
           },
           onSave: (value) async {
-            widget.configBloc.add(AGTouchpointConfigEventUpdateContent(
-                content: widget.content.copyWith(language: value)));
+            widget.touchpointEditorBloc.add(TouchpointEditorEventUpdateAGContent(
+              content.id!,
+              language: value,
+            ));
           },
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: MediaTrackField(
             label: 'Audio',
-            trackId: widget.content.mediaTrackId,
+            trackId: content.mediaTrackId,
             onUpload: (track) {
-              widget.configBloc.add(AGTouchpointConfigEventUpdateContent(
-                  content: widget.content.copyWith(mediaTrackId: track.id)));
+              widget.touchpointEditorBloc.add(
+                TouchpointEditorEventUpdateAGContent(
+                  content.id!,
+                  mediaTrackId: track.id,
+                ),
+              );
             },
           ),
         )
@@ -274,7 +260,7 @@ class MediaTrackField extends StatefulWidget {
 }
 
 class _MediaTrackFieldState extends State<MediaTrackField> {
-  final _mediaApi = getIt<MediaApi>();
+  final _cmsApi = getIt<CmsApi>();
 
   MMediaTrack? _track;
   bool _isLoading = false;
@@ -307,7 +293,7 @@ class _MediaTrackFieldState extends State<MediaTrackField> {
       _isLoading = true;
     });
 
-    final track = await _mediaApi.getMediaTrack(trackId);
+    final track = await _cmsApi.getMediaTrack(trackId);
 
     setState(() {
       _track = track;
@@ -316,22 +302,13 @@ class _MediaTrackFieldState extends State<MediaTrackField> {
   }
 
   void _onEdit() async {
-    final result = await showDialog<MediaUploadResult>(
+    final result = await showDialog<MMediaTrack>(
       context: context,
       builder: (context) => const MediaUploadDialog(),
     );
 
     if (result != null) {
-      final track = await _mediaApi.createMediaTrack(
-        MMediaTrack(
-          source: result.file.id,
-          type: result.file.type,
-          filename: result.file.name,
-          streamId: result.streamId ?? 0,
-        ),
-      );
-
-      widget.onUpload?.call(track);
+      widget.onUpload?.call(result);
     }
   }
 
@@ -355,7 +332,8 @@ class _MediaTrackFieldState extends State<MediaTrackField> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.label ?? 'Media', style: Theme.of(context).textTheme.titleSmall),
+          Text(widget.label ?? 'Media',
+              style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           if (_track!.type == MediaType.audio && _track!.previewUrl != null)
             InlineAudioPlayer(

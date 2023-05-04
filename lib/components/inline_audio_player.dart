@@ -1,5 +1,9 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
+final GetIt getIt = GetIt.instance;
 
 class InlineAudioPlayer extends StatefulWidget {
   const InlineAudioPlayer({
@@ -48,7 +52,11 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
   }
 
   void _setUrl(String url) {
-    _audioPlayer.setSourceUrl(url);
+    _audioPlayer.setSourceUrl(_getUrl(url));
+  }
+
+  String _getUrl(String url) {
+    return url.contains('http') ? url : "${getIt<Dio>().options.baseUrl}$url";
   }
 
   void _onPlayPausePressed() {
@@ -58,7 +66,7 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
     } else if (_audioPlayer.state == PlayerState.paused) {
       _audioPlayer.resume();
     } else {
-      _audioPlayer.play(UrlSource(widget.url));
+      _audioPlayer.play(UrlSource(_getUrl(widget.url)));
     }
   }
 
