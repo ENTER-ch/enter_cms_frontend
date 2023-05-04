@@ -26,14 +26,23 @@ jobs:
       - name: Build Flutter Web App
         run: flutter build web --release
 
+      - name: Compress build files
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r ./build/web.zip ./build/web
+
+      - name: Get commit count
+        id: get_commit_count
+        run: echo "::set-output name=count::$(git rev-list --count HEAD)"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          tag_name: ${{ github.sha }}
-          release_name: Release ${{ github.sha }}
+          tag_name: v${{ steps.get_commit_count.outputs.count }}
+          release_name: Release v${{ steps.get_commit_count.outputs.count }}
           body: Auto-generated release created by GitHub Actions.
           draft: false
           prerelease: false
@@ -47,12 +56,3 @@ jobs:
           asset_path: ./build/web.zip
           asset_name: web.zip
           asset_content_type: application/zip
-
-      - name: Zip and Upload Artifacts
-        run: |
-          zip -r ./build/web.zip ./build/web/
-          curl \
-            -H "Authorization: token ${{ secrets.GH_PAT }}" \
-            -H "Content-Type: $(file -b --mime-type ./build/web.zip)" \
-            --data-binary @./build/web.zip \
-            "${{ steps.create_release.outputs.upload_url }}/assets?name=web.zip"
