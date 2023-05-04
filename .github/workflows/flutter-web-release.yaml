@@ -21,7 +21,7 @@ jobs:
         run: flutter pub get
         
       - name: Run Build Runner
-        run: flutter pun run build_runner build
+        run: flutter pub run build_runner build
 
       - name: Build Flutter Web App
         run: flutter build web --release
