@@ -1,0 +1,55 @@
+name: Build and Release Flutter Web App
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web App
+        run: flutter build web --release
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.sha }}
+          release_name: Release ${{ github.sha }}
+          body: Auto-generated release created by GitHub Actions.
+          draft: false
+          prerelease: false
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/web.zip
+          asset_name: web.zip
+          asset_content_type: application/zip
+
+      - name: Zip and Upload Artifacts
+        run: |
+          zip -r ./build/web.zip ./build/web/
+          curl \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: $(file -b --mime-type ./build/web.zip)" \
+            --data-binary @./build/web.zip \
+            "${{ steps.create_release.outputs.upload_url }}/assets?name=web.zip"
