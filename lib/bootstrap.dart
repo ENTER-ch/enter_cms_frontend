@@ -15,11 +15,13 @@ import 'package:enter_cms_flutter/bloc/auth/auth_bloc.dart';
 import 'package:enter_cms_flutter/bloc/bloc_delegate.dart';
 import 'package:enter_cms_flutter/services/asset_loader.dart';
 import 'package:enter_cms_flutter/services/local_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
+import 'dart:html' as html;
 
 GetIt getIt = GetIt.instance;
 
@@ -48,9 +50,15 @@ Future<void> startApplication() async {
   final prefs = LocalPreferencesService.instance;
   await prefs.init();
 
+  String baseUrl = 'http://localhost:8000';
+  if (!kDebugMode) {
+    baseUrl = '${html.window.location.origin}/';
+  }
+  log.info('Base URL: $baseUrl');
+
   final dio = Dio();
   dio.options.responseType = ResponseType.json;
-  dio.options.baseUrl = 'http://localhost:8000/';
+  dio.options.baseUrl = baseUrl;
 
   getIt.registerSingleton<Dio>(dio);
 
