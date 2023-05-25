@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:enter_cms_flutter/bloc/auth/auth_bloc.dart';
 import 'package:enter_cms_flutter/models/user.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'dart:html' as html;
 
 final GetIt getIt = GetIt.instance;
 
@@ -88,7 +88,7 @@ class UserMenuPopup extends StatelessWidget {
             title: const Text('Admin panel'),
             trailing: const Icon(Icons.settings, size: 20,),
             onTap: () async {
-              await launchUrlString('${getIt<Dio>().options.baseUrl}/admin');
+              await launchUrlString('${html.window.location.origin}/admin/');
             },
           ),
           ListTile(
