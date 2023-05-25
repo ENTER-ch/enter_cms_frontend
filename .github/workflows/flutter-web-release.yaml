@@ -29,7 +29,8 @@ jobs:
       - name: Compress build files
         uses: montudor/action-zip@v1
         with:
-          args: cd ./build && zip -qq -r ./web.zip ./web
+          args: zip -qq -r ./web.zip ./web
+          working-directory: ./build
 
       - name: Get commit count
         id: get_commit_count
