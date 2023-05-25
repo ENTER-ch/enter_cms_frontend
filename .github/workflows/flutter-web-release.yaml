@@ -43,8 +43,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          tag_name: v${{ steps.get_commit_count.outputs.count }}
-          release_name: Release v${{ steps.get_commit_count.outputs.count }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
           body: Auto-generated release created by GitHub Actions.
           draft: false
           prerelease: false
