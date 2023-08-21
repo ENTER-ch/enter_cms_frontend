@@ -1,25 +1,16 @@
-import 'package:enter_cms_flutter/bloc/auth/auth_bloc.dart';
 import 'package:enter_cms_flutter/models/user.dart';
+import 'package:enter_cms_flutter/providers/state/auth_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'dart:html' as html;
 
 final GetIt getIt = GetIt.instance;
 
-class UserMenu extends StatefulWidget {
+class UserMenu extends ConsumerWidget {
   const UserMenu({Key? key}) : super(key: key);
 
-  @override
-  State<UserMenu> createState() => _UserMenuState();
-}
-
-class _UserMenuState extends State<UserMenu> {
-  final _authBloc = getIt<AuthBloc>();
-
-  void _showUserMenuPopup(MUser user) {
+  void _showUserMenuPopup(BuildContext context, MUser user) {
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
@@ -43,26 +34,22 @@ class _UserMenuState extends State<UserMenu> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      bloc: _authBloc,
-      builder: (context, state) {
-        if (state is AuthSuccess && state.user != null) {
-          final user = state.user!;
-          return TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onPressed: () => _showUserMenuPopup(user),
-              child: Text(user.fullName));
-        }
-        return const SizedBox();
-      },
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authControllerProvider);
+    if (authState.hasValue && authState.value is AuthSignedIn) {
+      final user = (authState.value as AuthSignedIn).user;
+      return TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          ),
+          onPressed: () => _showUserMenuPopup(context, user),
+          child: Text(user.fullName));
+    }
+    return const SizedBox.shrink();
   }
 }
 
-class UserMenuPopup extends StatelessWidget {
+class UserMenuPopup extends ConsumerWidget {
   final MUser user;
 
   const UserMenuPopup({
@@ -71,7 +58,7 @@ class UserMenuPopup extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       width: 400,
       child: Column(
@@ -88,7 +75,7 @@ class UserMenuPopup extends StatelessWidget {
             title: const Text('Admin panel'),
             trailing: const Icon(Icons.settings, size: 20,),
             onTap: () async {
-              await launchUrlString('${html.window.location.origin}/admin/');
+              await launchUrlString('/admin/');
             },
           ),
           ListTile(
@@ -96,8 +83,7 @@ class UserMenuPopup extends StatelessWidget {
             trailing: const Icon(Icons.logout, size: 20,),
             onTap: () {
               Navigator.pop(context);
-              getIt<AuthBloc>().add(const AuthLogout());
-              context.go('/');
+              ref.read(authControllerProvider.notifier).logout();
             },
           ),
         ],

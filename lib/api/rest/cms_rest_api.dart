@@ -4,15 +4,14 @@ import 'package:enter_cms_flutter/api/cms_api.dart';
 import 'package:enter_cms_flutter/api/rest/rest_api.dart';
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
-import 'package:enter_cms_flutter/models/media_track.dart';
-import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
-
 import 'package:enter_cms_flutter/models/floorplan.dart';
 import 'package:enter_cms_flutter/models/floorplan_view.dart';
+import 'package:enter_cms_flutter/models/media_track.dart';
+import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/position.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
-import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart' as http_parser;
+import 'package:mime/mime.dart';
 
 class CmsRestApi extends EnterRestApi implements CmsApi {
   CmsRestApi({required Dio dio}) : super(dio: dio);
@@ -151,7 +150,7 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
       {Function(int, int)? onProgress}) async {
     final String? mimeType = lookupMimeType(file.path);
     final formData = FormData.fromMap({
-      'file': await MultipartFile.fromBytes(await file.readAsBytes(),
+      'file': MultipartFile.fromBytes(await file.readAsBytes(),
           filename: file.name,
           contentType: http_parser.MediaType.parse(mimeType!)),
     });

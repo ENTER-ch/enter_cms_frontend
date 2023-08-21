@@ -1,40 +1,31 @@
-import 'package:enter_cms_flutter/bloc/auth/auth_bloc.dart';
 import 'package:enter_cms_flutter/components/enter_logo.dart';
+import 'package:enter_cms_flutter/providers/state/auth_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 
 final GetIt getIt = GetIt.instance;
 
-class LoginView extends StatefulWidget {
-  const LoginView({Key? key}) : super(key: key);
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginViewState extends State<LoginView> {
-  final _authBloc = getIt<AuthBloc>();
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
 
-  void _onAuthStateChanged(BuildContext context, AuthState state) {
-    // if (state is AuthSuccess) {
-    //   context.go('/');
-    // }
-  }
-
   void _login() {
     if (_formKey.currentState?.validate() == true) {
-      _authBloc.add(
-        AuthLogin(
-          username: _usernameController.text,
-          password: _passwordController.text,
-        ),
+      final authController = ref.read(authControllerProvider.notifier);
+      authController.loginWithUsernameAndPassword(
+        username: _usernameController.text,
+        password: _passwordController.text,
       );
     }
   }
@@ -57,21 +48,7 @@ class _LoginViewState extends State<LoginView> {
               const SizedBox(
                 height: 24,
               ),
-              BlocConsumer<AuthBloc, AuthState>(
-                bloc: _authBloc,
-                listener: _onAuthStateChanged,
-                builder: (context, state) {
-                  if (state is AuthInitial) {
-                    return const SizedBox();
-                  }
-                  if (state is AuthUnauthenticated ||
-                      state is AuthError ||
-                      state is AuthLoading) {
-                    return _buildLoginForm(context, state);
-                  }
-                  return const SizedBox();
-                },
-              ),
+              _buildLoginForm(context),
             ],
           ),
         ),
@@ -79,9 +56,8 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _buildLoginForm(BuildContext context, AuthState state) {
-    final isLoading = state is AuthLoading;
-    final error = state is AuthError ? state.message : null;
+  Widget _buildLoginForm(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
 
     return Card(
       shape: RoundedRectangleBorder(
@@ -103,7 +79,7 @@ class _LoginViewState extends State<LoginView> {
                 height: 16,
               ),
               TextFormField(
-                enabled: !isLoading,
+                enabled: !authState.isLoading,
                 controller: _usernameController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -124,7 +100,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               TextFormField(
                 controller: _passwordController,
-                enabled: !isLoading,
+                enabled: !authState.isLoading,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a password';
@@ -139,8 +115,7 @@ class _LoginViewState extends State<LoginView> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   contentPadding: const EdgeInsets.only(
-                      left: 16, right: 8, top: 12, bottom: 12
-                  ),
+                      left: 16, right: 8, top: 12, bottom: 12),
                   suffix: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -155,11 +130,11 @@ class _LoginViewState extends State<LoginView> {
                   ),
                 ),
               ),
-              if (error != null)
+              if (authState.hasError)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Text(
-                    error,
+                    ref.watch(authErrorMessageProvider),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
@@ -176,15 +151,14 @@ class _LoginViewState extends State<LoginView> {
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   minimumSize: const Size(double.infinity, 48),
                 ),
-                onPressed: !isLoading ? _login : null,
-                child: !isLoading
+                onPressed: !authState.isLoading ? _login : null,
+                child: !authState.isLoading
                     ? const Text('Login')
                     : SizedBox(
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(
                           color: Theme.of(context).colorScheme.onPrimary,
-                          strokeWidth: 2,
                         )),
               ),
             ],

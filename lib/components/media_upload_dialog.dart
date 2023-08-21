@@ -1,33 +1,31 @@
 import 'package:cross_file/cross_file.dart';
-import 'package:enter_cms_flutter/api/cms_api.dart';
-import 'package:enter_cms_flutter/api/media_api.dart';
 import 'package:enter_cms_flutter/components/inline_audio_player.dart';
-import 'package:enter_cms_flutter/models/media_file.dart';
 import 'package:enter_cms_flutter/models/media_track.dart';
+import 'package:enter_cms_flutter/providers/services/cms_api_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 
 final GetIt getIt = GetIt.instance;
 
-class MediaUploadDialog extends StatefulWidget {
+class MediaUploadDialog extends ConsumerStatefulWidget {
   const MediaUploadDialog({Key? key}) : super(key: key);
 
   @override
-  State<MediaUploadDialog> createState() => _MediaUploadDialogState();
+  ConsumerState<MediaUploadDialog> createState() => _MediaUploadDialogState();
 }
 
-class _MediaUploadDialogState extends State<MediaUploadDialog> {
+class _MediaUploadDialogState extends ConsumerState<MediaUploadDialog> {
   final _logger = Logger('MediaUploadDialog');
-  final _cmsApi = getIt.get<CmsApi>();
 
   XFile? _pickedFile;
 
   bool _uploading = false;
   double _uploadProgress = 0.0;
 
-  List<MMediaTrack> _uploadedTracks = [];
+  final List<MMediaTrack> _uploadedTracks = [];
 
   void _onPickFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -50,8 +48,9 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
       _uploading = true;
     });
 
+    final cmsApi = ref.read(cmsApiProvider);
     final result =
-        await _cmsApi.uploadMediaFile(_pickedFile!, onProgress: (sent, total) {
+        await cmsApi.uploadMediaFile(_pickedFile!, onProgress: (sent, total) {
       _logger.info("Upload progress: $sent/$total");
       setState(() {
         _uploadProgress = sent / total;
@@ -148,12 +147,13 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
               Navigator.of(context).pop(track);
             },
           ),
-          if (track.type == MediaType.audio && track.previewUrl != null) Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: InlineAudioPlayer(
+          if (track.type == MediaType.audio && track.previewUrl != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InlineAudioPlayer(
                 url: track.previewUrl!,
               ),
-          ),
+            ),
         ],
       ),
     );

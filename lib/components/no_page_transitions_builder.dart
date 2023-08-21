@@ -5,13 +5,18 @@ class NoPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-      PageRoute<T>? route,
-      BuildContext? context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget? child,
-      ) {
+    PageRoute<T>? route,
+    BuildContext? context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget? child,
+  ) {
     // only return the child without warping it with animations
-    return child!;
+    return Container(
+      color: context != null
+          ? Theme.of(context).colorScheme.background
+          : Colors.white,
+      child: child!,
+    );
   }
 }

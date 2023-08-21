@@ -1,5 +1,3 @@
-import 'package:enter_cms_flutter/models/beacon.dart';
-import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'floorplan.freezed.dart';
@@ -12,9 +10,7 @@ class MFloorplan with _$MFloorplan {
     required String image,
     required int width,
     required int height,
-    @JsonKey(name: 'scale_factor')
-    @Default(1.0)
-    double scaleFactor,
+    @JsonKey(name: 'scale_factor') @Default(1.0) double scaleFactor,
     String? title,
   }) = _MFloorplan;
 

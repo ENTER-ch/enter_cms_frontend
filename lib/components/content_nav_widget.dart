@@ -12,14 +12,16 @@ class ContentNavWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeader(context),
-        const Divider(),
-        if (child != null) child!,
-      ],
+    return Material(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context),
+          const Divider(),
+          if (child != null) child!,
+        ],
+      ),
     );
   }
 

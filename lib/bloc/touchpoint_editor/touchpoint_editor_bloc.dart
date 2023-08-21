@@ -1,14 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:enter_cms_flutter/api/cms_api.dart';
 import 'package:enter_cms_flutter/api/rest/rest_api.dart';
-import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:equatable/equatable.dart';
 import 'package:logging/logging.dart';
 
 part 'touchpoint_editor_event.dart';
-
 part 'touchpoint_editor_state.dart';
 
 class TouchpointEditorBloc
@@ -199,8 +197,8 @@ class TouchpointEditorBloc
 
           if (result.dirty == true) {
             add(TouchpointEditorEventLoad(
-                touchpointId: loadedState.touchpoint.id!,
-                silent: true,
+              touchpointId: loadedState.touchpoint.id!,
+              silent: true,
             ));
           }
         } catch (e) {

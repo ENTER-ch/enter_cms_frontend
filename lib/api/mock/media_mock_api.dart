@@ -6,8 +6,8 @@ import 'package:enter_cms_flutter/models/media_track.dart';
 class MediaMockApi extends MediaApi {
   static const _lagDuration = Duration(milliseconds: 250);
 
-  List<MMediaFile> _mediaFiles = [
-    MMediaFile(
+  final List<MMediaFile> _mediaFiles = [
+    const MMediaFile(
       id: 1,
       name: 'Media File 1',
       type: MediaType.audio,
@@ -20,8 +20,8 @@ class MediaMockApi extends MediaApi {
     ),
   ];
 
-  List<MMediaTrack> _mediaTracks = [
-    MMediaTrack(
+  final List<MMediaTrack> _mediaTracks = [
+    const MMediaTrack(
       id: 1,
       type: MediaType.audio,
       index: 0,
@@ -72,7 +72,8 @@ class MediaMockApi extends MediaApi {
   }
 
   @override
-  Future<MMediaFile> uploadFile(XFile file, {Function(int, int)? onProgress}) async {
+  Future<MMediaFile> uploadFile(XFile file,
+      {Function(int, int)? onProgress}) async {
     for (var i = 0; i < 100; i++) {
       await Future.delayed(const Duration(milliseconds: 10));
       onProgress?.call(i, 100);
@@ -82,7 +83,58 @@ class MediaMockApi extends MediaApi {
       id: _mediaFiles.length + 1,
       name: file.name,
       type: MediaType.audio,
-      mediaInfo: {"format": {"size": "9888", "bit_rate": "32000", "duration": "2.472000", "filename": "/var/www/django/media/raw/test.mp3", "nb_streams": 1, "start_time": "0.000000", "format_name": "mp3", "nb_programs": 0, "probe_score": 51, "format_long_name": "MP2/3 (MPEG audio layer 2/3)"}, "streams": [{"index": 0, "bit_rate": "32000", "channels": 1, "duration": "2.472000", "codec_tag": "0x0000", "start_pts": 0, "time_base": "1/14112000", "codec_name": "mp3", "codec_type": "audio", "sample_fmt": "fltp", "start_time": "0.000000", "disposition": {"dub": 0, "forced": 0, "lyrics": 0, "comment": 0, "default": 0, "karaoke": 0, "original": 0, "attached_pic": 0, "clean_effects": 0, "visual_impaired": 0, "hearing_impaired": 0, "timed_thumbnails": 0}, "duration_ts": 34884864, "sample_rate": "24000", "r_frame_rate": "0/0", "avg_frame_rate": "0/0", "channel_layout": "mono", "bits_per_sample": 0, "codec_long_name": "MP3 (MPEG audio layer 3)", "codec_time_base": "1/24000", "codec_tag_string": "[0][0][0][0]"}]},
+      mediaInfo: {
+        "format": {
+          "size": "9888",
+          "bit_rate": "32000",
+          "duration": "2.472000",
+          "filename": "/var/www/django/media/raw/test.mp3",
+          "nb_streams": 1,
+          "start_time": "0.000000",
+          "format_name": "mp3",
+          "nb_programs": 0,
+          "probe_score": 51,
+          "format_long_name": "MP2/3 (MPEG audio layer 2/3)"
+        },
+        "streams": [
+          {
+            "index": 0,
+            "bit_rate": "32000",
+            "channels": 1,
+            "duration": "2.472000",
+            "codec_tag": "0x0000",
+            "start_pts": 0,
+            "time_base": "1/14112000",
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_fmt": "fltp",
+            "start_time": "0.000000",
+            "disposition": {
+              "dub": 0,
+              "forced": 0,
+              "lyrics": 0,
+              "comment": 0,
+              "default": 0,
+              "karaoke": 0,
+              "original": 0,
+              "attached_pic": 0,
+              "clean_effects": 0,
+              "visual_impaired": 0,
+              "hearing_impaired": 0,
+              "timed_thumbnails": 0
+            },
+            "duration_ts": 34884864,
+            "sample_rate": "24000",
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "channel_layout": "mono",
+            "bits_per_sample": 0,
+            "codec_long_name": "MP3 (MPEG audio layer 3)",
+            "codec_time_base": "1/24000",
+            "codec_tag_string": "[0][0][0][0]"
+          }
+        ]
+      },
       url: '/mock_data/media/ag_test_content.wav',
     );
 

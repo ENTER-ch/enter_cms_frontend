@@ -14,7 +14,6 @@ class ContentRestApi extends ContentApi {
 
   ContentRestApi({required this.dio});
 
-
   @override
   Future<List<MBeacon>> getBeacons() {
     throw UnimplementedError();
@@ -52,21 +51,18 @@ class ContentRestApi extends ContentApi {
         '$_baseUrl/cms/touchpoints/',
       );
 
-      final touchpoints = (response.data as List)
-          .map((e) => MTouchpoint.fromJson(e))
-          .toList();
+      final touchpoints =
+          (response.data as List).map((e) => MTouchpoint.fromJson(e)).toList();
 
       return touchpoints;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }
@@ -75,27 +71,25 @@ class ContentRestApi extends ContentApi {
   }
 
   @override
-  Future<List<MTouchpoint>> getTouchpointsOfFloorplan({required int floorplanId}) async {
+  Future<List<MTouchpoint>> getTouchpointsOfFloorplan(
+      {required int floorplanId}) async {
     try {
       final response = await dio.get(
         '$_baseUrl/cms/touchpoints/by-floorplan/$floorplanId/',
       );
 
-      final touchpoints = (response.data as List)
-          .map((e) => MTouchpoint.fromJson(e))
-          .toList();
+      final touchpoints =
+          (response.data as List).map((e) => MTouchpoint.fromJson(e)).toList();
 
       return touchpoints;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }
@@ -111,16 +105,14 @@ class ContentRestApi extends ContentApi {
       );
 
       return MTouchpoint.fromJson(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }
@@ -137,16 +129,14 @@ class ContentRestApi extends ContentApi {
       );
 
       return MTouchpoint.fromJson(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }
@@ -163,16 +153,14 @@ class ContentRestApi extends ContentApi {
       );
 
       return MTouchpoint.fromJson(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }
@@ -186,16 +174,14 @@ class ContentRestApi extends ContentApi {
       await dio.delete(
         '$_baseUrl/cms/touchpoints/$id/',
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }

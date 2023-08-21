@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:enter_cms_flutter/api/auth_api.dart';
 import 'package:enter_cms_flutter/models/token.dart';
 import 'package:enter_cms_flutter/models/user.dart';
-import 'package:enter_cms_flutter/services/local_preferences.dart';
 import 'package:equatable/equatable.dart';
 import 'package:logging/logging.dart';
 
@@ -19,29 +18,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.authApi,
   }) : super(AuthInitial()) {
     on<AuthInit>((event, emit) async {
-      final token = prefsService.token;
-      if (token != null) {
-        try {
-          log.info("Refreshing Token $token");
-          final refreshedToken = await authApi.refreshToken(token: token);
-          prefsService.token = refreshedToken;
-          await authApi.configureToken(token: refreshedToken);
-          emit(AuthSuccess(token: refreshedToken));
-          add(const AuthRefreshUser());
-        } on ApiErrorUnauthorized catch (e) {
-          log.warning("Token refresh failed: $e");
-          prefsService.token = null;
-          emit(AuthUnauthenticated());
-        } on ApiErrorBadRequest catch (e) {
-          log.warning("Token refresh failed: $e");
-          prefsService.token = null;
-          emit(AuthUnauthenticated());
-        } catch (e) {
-          log.warning("Token refresh failed: $e");
-          emit(AuthError(message: e.toString()));
-        }
-      } else {
+      final prefs = prefsService;
+      final token = prefs.token;
+      try {
+        log.info("Refreshing Token $token");
+        final refreshedToken = await authApi.refreshToken(token: token);
+        //prefsService.token = refreshedToken;
+        await authApi.configureToken(token: refreshedToken);
+        emit(AuthSuccess(token: refreshedToken));
+        add(const AuthRefreshUser());
+      } on ApiErrorUnauthorized catch (e) {
+        log.warning("Token refresh failed: $e");
+        //prefsService.token = null;
         emit(AuthUnauthenticated());
+      } on ApiErrorBadRequest catch (e) {
+        log.warning("Token refresh failed: $e");
+        //prefsService.token = null;
+        emit(AuthUnauthenticated());
+      } catch (e) {
+        log.warning("Token refresh failed: $e");
+        emit(AuthError(message: e.toString()));
       }
     });
 
@@ -52,7 +48,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           username: event.username,
           password: event.password,
         );
-        prefsService.token = token;
+        //prefsService.token = token;
         await authApi.configureToken(token: token);
         emit(AuthSuccess(token: token));
         add(const AuthRefreshUser());
@@ -79,8 +75,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<AuthLogout>((event, emit) async {
-      prefsService.token = null;
+      //prefsService.token = null;
       emit(AuthUnauthenticated());
     });
   }
+}
+
+class LocalPreferencesService {
+  final token = const MToken(access: '');
 }

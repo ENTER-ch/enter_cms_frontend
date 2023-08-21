@@ -28,8 +28,8 @@ class MainNavigationRail extends StatelessWidget {
   ];
 
   int get _selectedIndex => destinations.indexWhere(
-      (destination) => routerState.fullpath?.startsWith(destination.path) ?? false
-  );
+        (destination) => routerState.location.startsWith(destination.path),
+      );
 
   void _onDestinationSelected(BuildContext context, int index) {
     GoRouter.of(context).go(destinations[index].path);
@@ -39,9 +39,6 @@ class MainNavigationRail extends StatelessWidget {
   Widget build(BuildContext context) {
     return NavigationRail(
       labelType: NavigationRailLabelType.all,
-      indicatorColor: Theme.of(context).primaryColor,
-      selectedIconTheme:
-          IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
       selectedIndex: _selectedIndex,
       destinations: destinations
           .map((e) => e.toNavigationRailDestination(context))

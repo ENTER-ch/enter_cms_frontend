@@ -45,7 +45,7 @@ class ContentEventCreateTouchpoint extends ContentEvent {
   List<Object> get props => [type];
 
   @override
-  String toString() => 'ContentEventCreateTouchpoint(${type})';
+  String toString() => 'ContentEventCreateTouchpoint($type)';
 }
 
 class ContentEventPlaceTouchpoint extends ContentEvent {
@@ -61,7 +61,8 @@ class ContentEventPlaceTouchpoint extends ContentEvent {
   List<Object> get props => [touchpoint, position];
 
   @override
-  String toString() => 'ContentEventPlaceTouchpoint(${touchpoint.id}, ${position})';
+  String toString() =>
+      'ContentEventPlaceTouchpoint(${touchpoint.id}, $position)';
 }
 
 class ContentEventUpdateTouchpoint extends ContentEvent {
@@ -77,5 +78,16 @@ class ContentEventUpdateTouchpoint extends ContentEvent {
   List<Object> get props => [touchpoint, internal];
 
   @override
-  String toString() => 'ContentEventUpdateTouchpoint(${touchpoint.id}, INTERNAL: ${internal})';
+  String toString() =>
+      'ContentEventUpdateTouchpoint(${touchpoint.id}, INTERNAL: $internal)';
+}
+
+class ContentEventCancelIntent extends ContentEvent {
+  const ContentEventCancelIntent();
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'ContentEventCancelIntent()';
 }

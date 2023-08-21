@@ -11,7 +11,6 @@ part 'touchpoint.g.dart';
 
 @freezed
 class MTouchpoint with _$MTouchpoint {
-
   const MTouchpoint._();
 
   const factory MTouchpoint({
@@ -19,16 +18,12 @@ class MTouchpoint with _$MTouchpoint {
     required TouchpointType type,
     TouchpointStatus? status,
     bool? dirty,
-    @JsonKey(name: 'touchpoint_id')
-    int? touchpointId,
+    @JsonKey(name: 'touchpoint_id') int? touchpointId,
     MPosition? position,
-    @JsonKey(name: 'internal_title')
-    String? internalTitle,
-    @JsonKey(name: 'ag_config')
-    MAGTouchpointConfig? agConfig,
-    @JsonKey(name: 'mp_config')
-    MMPTouchpointConfig? mpConfig,
-}) = _MTouchpoint;
+    @JsonKey(name: 'internal_title') String? internalTitle,
+    @JsonKey(name: 'ag_config') MAGTouchpointConfig? agConfig,
+    @JsonKey(name: 'mp_config') MMPTouchpointConfig? mpConfig,
+  }) = _MTouchpoint;
 
   factory MTouchpoint.fromJson(Map<String, dynamic> json) =>
       _$MTouchpointFromJson(json);
@@ -37,6 +32,18 @@ class MTouchpoint with _$MTouchpoint {
     return copyWith(
       agConfig: agConfig?.replaceContent(content),
     );
+  }
+
+  String get title => internalTitle ?? 'Touchpoint $touchpointIdString';
+
+  String get touchpointIdString =>
+      touchpointId?.toString().padLeft(3, "0") ?? '---';
+
+  bool searchFields(String query) {
+    final q = query.toUpperCase();
+    // Search internalTitle, touchpointId
+    return (internalTitle?.toUpperCase().contains(q) ?? false) ||
+        (touchpointId?.toString().toUpperCase().contains(q) ?? false);
   }
 }
 

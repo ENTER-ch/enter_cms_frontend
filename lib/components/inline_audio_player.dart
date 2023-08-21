@@ -1,11 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:dio/dio.dart';
+import 'package:enter_cms_flutter/components/toolbar_button.dart';
+import 'package:enter_cms_flutter/providers/services/dio_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final GetIt getIt = GetIt.instance;
-
-class InlineAudioPlayer extends StatefulWidget {
+class InlineAudioPlayer extends ConsumerStatefulWidget {
   const InlineAudioPlayer({
     Key? key,
     required this.url,
@@ -14,10 +13,10 @@ class InlineAudioPlayer extends StatefulWidget {
   final String url;
 
   @override
-  State<InlineAudioPlayer> createState() => _InlineAudioPlayerState();
+  ConsumerState<InlineAudioPlayer> createState() => _InlineAudioPlayerState();
 }
 
-class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
+class _InlineAudioPlayerState extends ConsumerState<InlineAudioPlayer> {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   Duration? _duration;
@@ -56,7 +55,8 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
   }
 
   String _getUrl(String url) {
-    return url.contains('http') ? url : "${getIt<Dio>().options.baseUrl}$url";
+    final dio = ref.read(dioProvider);
+    return url.contains('http') ? url : "${dio.options.baseUrl}/$url";
   }
 
   void _onPlayPausePressed() {
@@ -80,15 +80,16 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
   String _printPosition(Duration? position) {
     if (position != null && _duration != null) {
       return "${_printDuration(position)} / ${_printDuration(_duration!)}";
-    }
-    else if (position != null) {
+    } else if (position != null) {
       return _printDuration(position);
     }
     return '--:--';
   }
 
   double _getPosition(Duration? position) {
-    if (position != null && _duration != null && _duration!.inMilliseconds > 0) {
+    if (position != null &&
+        _duration != null &&
+        _duration!.inMilliseconds > 0) {
       return position.inMilliseconds / _duration!.inMilliseconds;
     }
     return 0;
@@ -97,31 +98,28 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<PlayerState>(
-      stream: _audioPlayer.onPlayerStateChanged,
-      builder: (context, snapshot) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _onPlayPausePressed,
-              child: snapshot.data == PlayerState.playing ? const Icon(Icons.stop) : const Icon(Icons.play_arrow),
-            ),
-            const SizedBox(
-              width: 8,
-            ),
-            StreamBuilder<Duration>(
-              stream: _audioPlayer.onPositionChanged,
-              builder: (context, snapshot) {
-                return _buildProgress(
-                  _audioPlayer.state == PlayerState.playing,
-                  snapshot.data,
-                );
-              }
-            ),
-          ],
-        );
-      }
-    );
+        stream: _audioPlayer.onPlayerStateChanged,
+        builder: (context, snapshot) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ToolbarButton(
+                onTap: _onPlayPausePressed,
+                icon: snapshot.data == PlayerState.playing
+                    ? Icons.stop
+                    : Icons.play_arrow,
+              ),
+              StreamBuilder<Duration>(
+                  stream: _audioPlayer.onPositionChanged,
+                  builder: (context, snapshot) {
+                    return _buildProgress(
+                      _audioPlayer.state == PlayerState.playing,
+                      snapshot.data,
+                    );
+                  }),
+            ],
+          );
+        });
   }
 
   Widget _buildProgress(bool isPlaying, Duration? position) {
@@ -131,7 +129,8 @@ class _InlineAudioPlayerState extends State<InlineAudioPlayer> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(_printPosition(isPlaying ? position : Duration.zero)),
-          LinearProgressIndicator(value: _getPosition(isPlaying ? position : Duration.zero)),
+          LinearProgressIndicator(
+              value: _getPosition(isPlaying ? position : Duration.zero)),
         ],
       ),
     );

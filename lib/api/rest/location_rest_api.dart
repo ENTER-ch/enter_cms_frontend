@@ -10,7 +10,6 @@ class LocationRestApi extends LocationApi {
 
   LocationRestApi({required this.dio});
 
-
   @override
   Future<List<MFloorplan>> getFloorplans() async {
     try {
@@ -18,21 +17,18 @@ class LocationRestApi extends LocationApi {
         '$_baseUrl/cms/floorplans/',
       );
 
-      final floorplans = (response.data as List)
-          .map((e) => MFloorplan.fromJson(e))
-          .toList();
+      final floorplans =
+          (response.data as List).map((e) => MFloorplan.fromJson(e)).toList();
 
       return floorplans;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }
@@ -48,16 +44,14 @@ class LocationRestApi extends LocationApi {
       );
 
       return MFloorplan.fromJson(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         final message = e.response?.data['detail'] ?? 'Unauthorized';
         throw ApiErrorUnauthorized(message);
-      }
-      else if (e.response?.statusCode == 400) {
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['detail'] ?? 'Bad Request';
         throw ApiErrorBadRequest(message);
-      }
-      else if (e.response?.statusCode == 500) {
+      } else if (e.response?.statusCode == 500) {
         final message = e.response?.data['detail'] ?? 'Internal Server Error';
         throw ApiErrorBadRequest(message);
       }

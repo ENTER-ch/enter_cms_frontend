@@ -1,43 +1,19 @@
-import 'package:dio/dio.dart';
-import 'package:enter_cms_flutter/bloc/auth/auth_bloc.dart';
-import 'package:enter_cms_flutter/router.dart';
+import 'package:enter_cms_flutter/providers/services/router_provider.dart';
 import 'package:enter_cms_flutter/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final GetIt getIt = GetIt.instance;
 
-class EnterCmsApplication extends StatefulWidget {
-  const EnterCmsApplication({Key? key}) : super(key: key);
+class EnterCmsApplication extends HookConsumerWidget {
+  const EnterCmsApplication({super.key});
 
   @override
-  State<EnterCmsApplication> createState() => _EnterCmsApplicationState();
-}
-
-class _EnterCmsApplicationState extends State<EnterCmsApplication> {
-  @override
-  void initState() {
-    super.initState();
-    registerDioInterceptors();
-  }
-
-  void registerDioInterceptors() {
-    final dio = getIt<Dio>();
-
-    dio.interceptors.add(InterceptorsWrapper(
-      onError: (error, handler) {
-        if (error.response?.statusCode == 401) {
-          getIt<AuthBloc>().add(const AuthLogout());
-          router.go('/login');
-        }
-        return handler.next(error);
-      },
-    ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
     return MaterialApp.router(
+      title: 'Enter CMS',
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,

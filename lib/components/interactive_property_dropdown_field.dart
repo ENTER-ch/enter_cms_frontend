@@ -25,13 +25,19 @@ class InteractivePropertyDropdownField extends StatefulWidget {
   final String? errorMessage;
 
   @override
-  State<InteractivePropertyDropdownField> createState() => _InteractivePropertyDropdownFieldState();
+  State<InteractivePropertyDropdownField> createState() =>
+      _InteractivePropertyDropdownFieldState();
 }
 
-class _InteractivePropertyDropdownFieldState extends State<InteractivePropertyDropdownField> {
+class _InteractivePropertyDropdownFieldState
+    extends State<InteractivePropertyDropdownField> {
   dynamic dropdownValue;
+  // TODO Show errors
+  // ignore: unused_field
   String? _errorMessage;
 
+  // TODO Show loading state
+  // ignore: unused_field
   bool _isLoading = false;
 
   @override
@@ -60,7 +66,7 @@ class _InteractivePropertyDropdownFieldState extends State<InteractivePropertyDr
 
   void _initForm() {
     setState(() {
-      dropdownValue =  widget.initialValue ?? '';
+      dropdownValue = widget.initialValue ?? '';
       _errorMessage = null;
     });
   }

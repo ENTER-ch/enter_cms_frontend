@@ -1,10 +1,16 @@
 import 'dart:math';
-import 'package:enter_cms_flutter/components/interactive_viewer.dart';
+
 import 'package:enter_cms_flutter/models/floorplan.dart';
-import 'package:vector_math/vector_math_64.dart' as vector_math;
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart' as vector_math;
 
 class PanZoomMapView extends StatefulWidget {
+  final MFloorplan? floorplan;
+  final Widget Function(
+          BuildContext context, vector_math.Quad viewport, double scaleFactor)?
+      overlayBuilder;
+  final void Function(Offset position)? onTap;
+
   const PanZoomMapView({
     Key? key,
     this.floorplan,
@@ -12,9 +18,12 @@ class PanZoomMapView extends StatefulWidget {
     this.onTap,
   }) : super(key: key);
 
-  final MFloorplan? floorplan;
-  final Widget Function(BuildContext context, vector_math.Quad viewport, double scaleFactor)? overlayBuilder;
-  final void Function(Offset position)? onTap;
+  static bool isPositionInView(Offset position, vector_math.Quad viewport) {
+    return viewport.point0.x <= position.dx &&
+        viewport.point1.x >= position.dx &&
+        viewport.point0.y <= position.dy &&
+        viewport.point2.y >= position.dy;
+  }
 
   @override
   State<PanZoomMapView> createState() => _PanZoomMapViewState();
@@ -22,12 +31,11 @@ class PanZoomMapView extends StatefulWidget {
 
 class _PanZoomMapViewState extends State<PanZoomMapView>
     with TickerProviderStateMixin {
-
   final _transformationController = TransformationController();
   Animation<Matrix4>? _animationReset;
   late final AnimationController _controllerReset;
 
-  Size _mapSize = const Size(0,0);
+  Size _mapSize = const Size(0, 0);
   NetworkImage? _mapImage;
   bool _loading = true;
 
@@ -71,9 +79,11 @@ class _PanZoomMapViewState extends State<PanZoomMapView>
       _mapImage = NetworkImage(widget.floorplan!.image);
       await precacheImage(_mapImage!, context);
 
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -158,15 +168,17 @@ class _PanZoomMapViewState extends State<PanZoomMapView>
     final size = MediaQuery.of(context).size;
     return Stack(
       children: [
-        CustomInteractiveViewer.builder(
+        InteractiveViewer.builder(
           trackpadScrollCausesScale: true,
           transformationController: _transformationController,
           onInteractionStart: _onInteractionStart,
           maxScale: 2.0,
           minScale: _getInitialScaleFactor(),
-          boundaryMargin: EdgeInsets.symmetric(horizontal: size.width, vertical: size.height),
+          boundaryMargin: EdgeInsets.symmetric(
+              horizontal: size.width, vertical: size.height),
           builder: (context, viewport) {
-            final overlay = widget.overlayBuilder?.call(context, viewport, _getCurrentScaleFactor());
+            final overlay = widget.overlayBuilder
+                ?.call(context, viewport, _getCurrentScaleFactor());
             return GestureDetector(
               onTapDown: _onTap,
               child: SizedBox(

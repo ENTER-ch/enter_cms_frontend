@@ -31,6 +31,7 @@
 
   <title>ENTER Content Management System</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="index.css">
 
   <script>
     // The value below is injected by flutter build, do not touch.
@@ -51,8 +52,15 @@
         return engineInitializer.initializeEngine();
       }).then(function(appRunner) {
         return appRunner.runApp();
+        document.querySelector('.preload').style.display = 'none';
       });
     });
   </script>
+  <div class="preload">
+    <div class="preload__container">
+      <img src="/assets/assets/svg/enter-logo.svg" alt="ENTER">
+      <progress class="pure-material-progress-circular"/>
+    </div>
+  </div>
 </body>
 </html>

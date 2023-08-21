@@ -1,15 +1,11 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:enter_cms_flutter/api/cms_api.dart';
-import 'package:enter_cms_flutter/api/content_api.dart';
 import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/position.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:equatable/equatable.dart';
 
 part 'content_event.dart';
-
 part 'content_state.dart';
 
 class ContentBloc extends Bloc<ContentEvent, ContentState> {
@@ -22,6 +18,7 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     on<ContentEventSelectTouchpoint>(_onSelectTouchpoint);
     on<ContentEventCreateTouchpoint>(_onCreateTouchpoint);
     on<ContentEventPlaceTouchpoint>(_onPlaceTouchpoint);
+    on<ContentEventCancelIntent>(_onCancelIntent);
     on<ContentEventUpdateTouchpoint>(_onUpdateTouchpoint);
   }
 
@@ -87,16 +84,45 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     }
   }
 
+  void _onCancelIntent(
+      ContentEventCancelIntent event, Emitter<ContentState> emit) async {
+    if (state is ContentLoaded) {
+      final contentLoaded = state as ContentLoaded;
+
+      if (contentLoaded.intent == ContentIntent.placeTouchpoint &&
+          contentLoaded.selectedTouchpoint != null) {
+        cmsApi.deleteTouchpoint(contentLoaded.selectedTouchpoint!.id!);
+        final touchpoints = contentLoaded.touchpoints
+            .where((e) => e.id != contentLoaded.selectedTouchpoint!.id)
+            .toList();
+
+        emit(contentLoaded.copyWith(
+          clearIntent: true,
+          touchpoints: touchpoints,
+          selectedTouchpoint: touchpoints.first,
+        ));
+
+        return;
+      }
+
+      emit(contentLoaded.copyWith(
+        clearIntent: true,
+      ));
+    }
+  }
+
   void _onUpdateTouchpoint(
       ContentEventUpdateTouchpoint event, Emitter<ContentState> emit) async {
     if (state is ContentLoaded) {
       final contentLoaded = state as ContentLoaded;
 
-      final updated = event.internal ? event.touchpoint : await cmsApi.updateTouchpoint(
-        event.touchpoint.id!,
-        touchpointId: event.touchpoint.touchpointId,
-        position: event.touchpoint.position,
-      );
+      final updated = event.internal
+          ? event.touchpoint
+          : await cmsApi.updateTouchpoint(
+              event.touchpoint.id!,
+              touchpointId: event.touchpoint.touchpointId,
+              position: event.touchpoint.position,
+            );
 
       final touchpoints = contentLoaded.touchpoints
           .map((e) => e.id == updated.id ? updated : e)
