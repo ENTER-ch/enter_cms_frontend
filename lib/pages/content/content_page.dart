@@ -1,10 +1,16 @@
 import 'package:enter_cms_flutter/components/content_list_view.dart';
 import 'package:enter_cms_flutter/components/content_map_view.dart';
+import 'package:enter_cms_flutter/components/content_nav_widget.dart';
 import 'package:enter_cms_flutter/components/content_toolbar.dart';
 import 'package:enter_cms_flutter/components/map_chooser_widget.dart';
+import 'package:enter_cms_flutter/components/toolbar_button.dart';
 import 'package:enter_cms_flutter/components/touchpoint_editor.dart';
+import 'package:enter_cms_flutter/models/release.dart';
 import 'package:enter_cms_flutter/pages/content/content_state.dart';
 import 'package:enter_cms_flutter/providers/model/floorplan_provider.dart';
+import 'package:enter_cms_flutter/providers/model/release_provider.dart';
+import 'package:enter_cms_flutter/providers/services/cms_api_provider.dart';
+import 'package:enter_cms_flutter/providers/state/touchpoint_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -21,19 +27,6 @@ class ContentPageLoader extends ConsumerWidget {
     super.key,
     this.floorplanId,
   });
-
-  // void _tryRedirect(BuildContext context, WidgetRef ref) {
-  //   if (floorplanId != null) {
-  //     SchedulerBinding.instance.addPostFrameCallback((_) {
-  //       context.goNamed(
-  //         'content-floorplan',
-  //         pathParameters: {
-  //           'floorplanId': floorplanId!,
-  //         },
-  //       );
-  //     });
-  //   }
-  // }
 
   void _redirectToFloorplan(BuildContext context, String floorplanId) {
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -100,44 +93,44 @@ class ContentPage extends ConsumerWidget {
       overrides: [
         selectedFloorplanIdProvider.overrideWithValue(floorplanId),
       ],
-      child: const Row(
-        children: [
-          SizedBox(
-            width: 200,
-            height: double.infinity,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MapChooserWidget(),
-                  Divider(),
-                  TouchpointSearch(),
-                  Divider(),
-                ],
-              ),
-            ),
-          ),
-          VerticalDivider(),
+      child: Row(
+        key: ValueKey("content-$floorplanId"),
+        children: const [
           Expanded(
             child: Column(
               children: [
                 ContentToolbar(),
                 Divider(),
-                Expanded(
-                  child: ContentMapView(),
-                ),
+                ContentMainView(),
                 Divider(),
-                SizedBox(
-                  height: 250,
-                  child: ContentListView(),
-                )
+                ReleasePanel(),
               ],
             ),
           ),
           VerticalDivider(),
-          InspectorPane(),
+          SizedBox(
+            width: 500,
+            height: double.infinity,
+            child: InspectorPane(),
+          ),
         ],
       ),
+    );
+  }
+}
+
+class ContentMainView extends ConsumerWidget {
+  const ContentMainView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedContentView = ref.watch(selectedContentViewProvider);
+
+    return Expanded(
+      child: switch (selectedContentView) {
+        ContentView.map => const ContentMapView(),
+        ContentView.list => const ContentListView(),
+      },
     );
   }
 }
@@ -150,27 +143,155 @@ class InspectorPane extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTouchpointId = ref.watch(selectedTouchpointIdProvider);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: selectedTouchpointId != null ? 300 : 0,
-      child: Stack(
+    return ContentNavWidget(
+      title: const Text('Editor'),
+      child: Expanded(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (selectedTouchpointId != null)
+                TouchpointEditorWidget(
+                  key: ValueKey(selectedTouchpointId),
+                  touchpointId: selectedTouchpointId,
+                )
+              else
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'Select a touchpoint to start editing.',
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ReleasePanel extends ConsumerWidget {
+  const ReleasePanel({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentRelease = ref.watch(releaseProvider(null));
+
+    return IntrinsicHeight(
+      child: Row(
         children: [
-          Positioned(
-            width: 300,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (selectedTouchpointId != null)
-                    TouchpointEditorWidget(
-                      key: ValueKey(selectedTouchpointId),
-                      touchpointId: selectedTouchpointId,
-                    ),
-                ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: currentRelease.maybeWhen(
+                data: (release) => Tooltip(
+                  message: release.title ?? '',
+                  child: Row(
+                    children: [
+                      Icon(Icons.circle, color: release.status.color),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        "Latest Release: ${release.label}",
+                      ),
+                    ],
+                  ),
+                ),
+                loading: () => const LinearProgressIndicator(),
+                orElse: () => const SizedBox.shrink(),
               ),
             ),
           ),
+          const Spacer(),
+          const VerticalDivider(),
+          ToolbarButton(
+            icon: Icons.publish,
+            label: 'Create Release',
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) => const CreateReleaseDialog(),
+              );
+            },
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class CreateReleaseDialog extends HookConsumerWidget {
+  const CreateReleaseDialog({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final releasePreview = ref.watch(releasePreviewProvider);
+
+    final releaseNotesController = useTextEditingController();
+
+    onCreate() async {
+      await ref.read(cmsApiProvider).createRelease(
+            title: releaseNotesController.text,
+          );
+      ref.invalidate(releaseProvider(null));
+      ref.invalidate(touchpointProvider);
+      if (context.mounted) Navigator.of(context).pop();
+    }
+
+    return Dialog(
+      elevation: 0,
+      child: SizedBox(
+        width: 800,
+        height: 500,
+        child: IntrinsicHeight(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text('Create Release',
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              const Divider(),
+              Expanded(
+                child: releasePreview.maybeWhen(
+                  orElse: () => const SizedBox.shrink(),
+                  data: (data) {
+                    return Column(
+                      children: [
+                        ListTile(
+                            title: Text(
+                                "This release will contain ${data.count} touchpoints.")),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: TextField(
+                            controller: releaseNotesController,
+                            maxLines: 10,
+                            decoration: const InputDecoration(
+                              hintText: 'Release notes',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const Divider(),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: onCreate,
+                      child: const Text('Create'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -198,7 +319,7 @@ class TouchpointSearch extends HookConsumerWidget {
               searchController.clear();
               ref.invalidate(floorplanViewSearchProvider);
             },
-            icon: Icon(
+            icon: const Icon(
               Icons.clear,
               size: 16,
             ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:enter_cms_flutter/layouts/base.dart';
 import 'package:enter_cms_flutter/pages/content/content_page.dart';
+import 'package:enter_cms_flutter/pages/devices.dart';
 import 'package:enter_cms_flutter/pages/login.dart';
 import 'package:enter_cms_flutter/pages/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +105,6 @@ class DevicesRoute extends GoRouteData {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const Text('Devices');
+    return const DevicesPage();
   }
 }

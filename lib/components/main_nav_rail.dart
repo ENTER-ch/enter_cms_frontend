@@ -18,6 +18,7 @@ class MainNavigationRail extends StatelessWidget {
     GoRouterNavRailDestination(
       path: '/devices',
       label: 'Devices',
+      disabled: true,
       icon: Icons.device_hub,
     ),
     // GoRouterNavRailDestination(
@@ -28,7 +29,8 @@ class MainNavigationRail extends StatelessWidget {
   ];
 
   int get _selectedIndex => destinations.indexWhere(
-        (destination) => routerState.location.startsWith(destination.path),
+        (destination) =>
+            routerState.matchedLocation.startsWith(destination.path),
       );
 
   void _onDestinationSelected(BuildContext context, int index) {
@@ -52,17 +54,20 @@ class GoRouterNavRailDestination {
   final String path;
   final String label;
   final IconData icon;
+  final bool disabled;
 
   const GoRouterNavRailDestination({
     required this.path,
     required this.label,
     required this.icon,
+    this.disabled = false,
   });
 
   NavigationRailDestination toNavigationRailDestination(BuildContext context) {
     return NavigationRailDestination(
       icon: Icon(icon),
       label: Text(label),
+      disabled: disabled,
     );
   }
 }

@@ -5,8 +5,13 @@ class DevicesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Devices', style: Theme.of(context).textTheme.titleLarge,),
+    return Column(
+      children: [
+        Text(
+          'Devices',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ],
     );
   }
 }

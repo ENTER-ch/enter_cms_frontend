@@ -1,5 +1,6 @@
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
+import 'package:enter_cms_flutter/models/checklist.dart';
 import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/position.dart';
 import 'package:enter_cms_flutter/theme/theme.dart';
@@ -23,6 +24,7 @@ class MTouchpoint with _$MTouchpoint {
     @JsonKey(name: 'internal_title') String? internalTitle,
     @JsonKey(name: 'ag_config') MAGTouchpointConfig? agConfig,
     @JsonKey(name: 'mp_config') MMPTouchpointConfig? mpConfig,
+    @Default([]) List<MChecklistItem> checklist,
   }) = _MTouchpoint;
 
   factory MTouchpoint.fromJson(Map<String, dynamic> json) =>
@@ -38,6 +40,44 @@ class MTouchpoint with _$MTouchpoint {
 
   String get touchpointIdString =>
       touchpointId?.toString().padLeft(3, "0") ?? '---';
+
+  Color getStatusColor(BuildContext context) {
+    if (checklist.isNotEmpty) {
+      return EnterThemeColors.red;
+    }
+
+    switch (status) {
+      case TouchpointStatus.draft:
+        return Colors.grey;
+      case TouchpointStatus.published:
+        if (dirty != true) {
+          return EnterThemeColors.green;
+        } else {
+          return EnterThemeColors.blue;
+        }
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String get statusLabel {
+    if (checklist.isNotEmpty) {
+      return "Incomplete";
+    }
+
+    switch (status) {
+      case TouchpointStatus.draft:
+        return "Draft";
+      case TouchpointStatus.published:
+        if (dirty != true) {
+          return "Released";
+        } else {
+          return "Ready for Release";
+        }
+      default:
+        return "Unknown";
+    }
+  }
 
   bool searchFields(String query) {
     final q = query.toUpperCase();

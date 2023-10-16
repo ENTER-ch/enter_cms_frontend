@@ -1,4 +1,5 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:enter_cms_flutter/components/content_nav_widget.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:enter_cms_flutter/pages/content/content_state.dart';
 import 'package:flutter/material.dart';
@@ -52,13 +53,25 @@ class _ContentListViewState extends ConsumerState<ContentListView> {
           label: const Text('Title'),
           onSort: (index, ascending) => _onSort(ref, index, ascending),
         ),
-        const DataColumn2(
-            label: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          // if (widget.expanded != null) ToolbarButton(
-          //   icon: widget.expanded! ? Icons.close_fullscreen : Icons.open_in_full,
-          //   onTap: () => widget.onExpand?.call(!widget.expanded!),
-          // ),
-        ])),
+        DataColumn2(
+          label: const Text(
+            'Status',
+            textAlign: TextAlign.right,
+          ),
+          fixedWidth: 90,
+          onSort: (index, ascending) => _onSort(ref, index, ascending),
+        ),
+        // const DataColumn2(
+        //   label: Row(
+        //     mainAxisAlignment: MainAxisAlignment.end,
+        //     children: [
+        //       // if (widget.expanded != null) ToolbarButton(
+        //       //   icon: widget.expanded! ? Icons.close_fullscreen : Icons.open_in_full,
+        //       //   onTap: () => widget.onExpand?.call(!widget.expanded!),
+        //       // ),
+        //     ],
+        //   ),
+        // ),
       ],
       rows: elements
           .map((e) => DataRow2(
@@ -75,7 +88,20 @@ class _ContentListViewState extends ConsumerState<ContentListView> {
                   )),
                   DataCell(Text(e.touchpointIdString)),
                   DataCell(Text(e.title)),
-                  const DataCell(SizedBox()),
+                  DataCell(Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Tooltip(
+                        message: e.statusLabel,
+                        child: Icon(
+                          Icons.circle,
+                          color: e.getStatusColor(context),
+                          size: 16,
+                        ),
+                      ),
+                    ],
+                  )),
+                  //const DataCell(SizedBox()),
                 ],
               ))
           .toList(),

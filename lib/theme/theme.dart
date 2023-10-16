@@ -41,6 +41,11 @@ final PageTransitionsTheme pageTransitionsTheme =
     platform: const NoPageTransitionsBuilder(),
 });
 
+const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
+  border: const OutlineInputBorder(),
+  isDense: true,
+);
+
 final ThemeData baseLightTheme = ThemeData.from(
   colorScheme: lightColorScheme,
   useMaterial3: true,
@@ -62,6 +67,7 @@ final ThemeData lightTheme = baseLightTheme.copyWith(
     color: baseLightTheme.colorScheme.surfaceVariant,
   ),
   pageTransitionsTheme: pageTransitionsTheme,
+  inputDecorationTheme: inputDecorationTheme,
   appBarTheme: baseLightTheme.appBarTheme.copyWith(
     backgroundColor: baseLightTheme.colorScheme.primary,
     foregroundColor: Colors.white,
@@ -74,6 +80,7 @@ final ThemeData darkTheme = baseDarkTheme.copyWith(
     color: baseDarkTheme.colorScheme.surfaceVariant,
   ),
   pageTransitionsTheme: pageTransitionsTheme,
+  inputDecorationTheme: inputDecorationTheme,
   appBarTheme: baseDarkTheme.appBarTheme.copyWith(
     backgroundColor: baseDarkTheme.colorScheme.primaryContainer,
     foregroundColor: Colors.white,

@@ -43,11 +43,13 @@ class RouterListenable extends _$RouterListenable implements Listenable {
     // Authed: no redirect
     if (this.state.isLoading || this.state.hasError) return null;
 
-    final fromParam = state.queryParameters['from'];
-    final fromPath = fromParam != null ? '?from=$fromParam' : '?from=${Uri.encodeComponent(state.location)}';
+    final fromParam = state.uri.queryParameters['from'];
+    final fromPath = fromParam != null
+        ? '?from=$fromParam'
+        : '?from=${Uri.encodeComponent(state.matchedLocation)}';
     final from = fromParam != null ? Uri.decodeComponent(fromParam) : null;
 
-    final isSplash = state.location.startsWith(SplashScreenRoute.path);
+    final isSplash = state.matchedLocation.startsWith(SplashScreenRoute.path);
     if (isSplash) {
       final authState = ref.read(authControllerProvider);
       if (authState.isLoading) return null;
@@ -55,7 +57,7 @@ class RouterListenable extends _$RouterListenable implements Listenable {
       return LoginRoute.path + fromPath;
     }
 
-    final isLoggingIn = state.location.startsWith(LoginRoute.path);
+    final isLoggingIn = state.matchedLocation.startsWith(LoginRoute.path);
     if (isLoggingIn) {
       if (_isAuthenticated) return from ?? RootRoute.path;
       return null;

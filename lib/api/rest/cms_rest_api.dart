@@ -9,6 +9,8 @@ import 'package:enter_cms_flutter/models/floorplan_view.dart';
 import 'package:enter_cms_flutter/models/media_track.dart';
 import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/position.dart';
+import 'package:enter_cms_flutter/models/release.dart';
+import 'package:enter_cms_flutter/models/release_preview.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:http_parser/http_parser.dart' as http_parser;
 import 'package:mime/mime.dart';
@@ -97,8 +99,13 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
     return MTouchpoint.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<MAGTouchpointConfig> getAGTouchpointConfig(int id) async {
+    final response = await get('/cms/touchpoints/ag/$id/');
+    return MAGTouchpointConfig.fromJson(response.data as Map<String, dynamic>);
+  }
+
   @override
-  Future<MTouchpoint> updateAGTouchpointConfig(
+  Future<MAGTouchpointConfig> updateAGTouchpointConfig(
     int id, {
     AGPlaybackMode? playbackMode,
   }) async {
@@ -108,7 +115,7 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
         if (playbackMode != null) 'playback_mode': playbackMode.jsonValue,
       },
     );
-    return MTouchpoint.fromJson(response.data as Map<String, dynamic>);
+    return MAGTouchpointConfig.fromJson(response.data as Map<String, dynamic>);
   }
 
   @override
@@ -123,11 +130,31 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
   }
 
   @override
+  Future<MAGContent> createAGContent(
+    int agTouchpointId, {
+    String? label,
+    String? language,
+    int? mediaTrackId,
+  }) async {
+    final response = await post(
+      '/cms/content/ag/',
+      data: {
+        'config': agTouchpointId,
+        if (label != null) 'label': label,
+        if (language != null) 'language': language,
+        if (mediaTrackId != null) 'media_track': mediaTrackId,
+      },
+    );
+    return MAGContent.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
   Future<MAGContent> updateAGContent(
     int id, {
     String? label,
     String? language,
     int? mediaTrackId,
+    bool clearMediaTrackId = false,
   }) async {
     final response = await patch(
       '/cms/content/ag/$id/',
@@ -135,6 +162,7 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
         if (label != null) 'label': label,
         if (language != null) 'language': language,
         if (mediaTrackId != null) 'media_track': mediaTrackId,
+        if (clearMediaTrackId) 'media_track': null,
       },
     );
     return MAGContent.fromJson(response.data as Map<String, dynamic>);
@@ -173,5 +201,38 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
   Future<MMediaTrack> getMediaTrack(int id) async {
     final response = await get('/media/tracks/$id/');
     return MMediaTrack.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<MRelease> createRelease({
+    required String title,
+  }) async {
+    final response = await post(
+      '/cms/releases/',
+      data: {
+        'title': title,
+      },
+    );
+    return MRelease.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<MRelease> getCurrentRelease() async {
+    final response = await get(
+      '/cms/releases/current/',
+    );
+    return MRelease.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<MReleasePreview> getReleasePreview() async {
+    final response = await get('/cms/releases/preview/');
+    return MReleasePreview.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<MRelease> getRelease(int id) async {
+    final response = await get('/cms/releases/$id/');
+    return MRelease.fromJson(response.data as Map<String, dynamic>);
   }
 }

@@ -10,12 +10,17 @@ class MAGContent with _$MAGContent {
     bool? dirty,
     String? label,
     String? language,
-    @JsonKey(name: 'media_track')
-    int? mediaTrackId,
-    @JsonKey(name: 'needs_release')
-    bool? needsRelease,
+    @JsonKey(name: 'config') int? agConfigId,
+    @JsonKey(name: 'media_track') int? mediaTrackId,
+    @JsonKey(name: 'needs_release') bool? needsRelease,
   }) = _MAGContent;
+
+  const MAGContent._();
 
   factory MAGContent.fromJson(Map<String, dynamic> json) =>
       _$MAGContentFromJson(json);
+
+  String get shortLabel {
+    return label?.replaceAll(RegExp(r'\s+'), ' ') ?? '';
+  }
 }

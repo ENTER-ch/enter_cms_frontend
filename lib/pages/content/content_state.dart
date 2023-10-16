@@ -19,6 +19,23 @@ int selectedFloorplanId(SelectedFloorplanIdRef ref) {
   throw UnimplementedError();
 }
 
+enum ContentView {
+  map,
+  list,
+}
+
+@Riverpod(dependencies: [])
+class SelectedContentView extends _$SelectedContentView {
+  @override
+  ContentView build() {
+    return ContentView.list;
+  }
+
+  void set(ContentView view) {
+    state = view;
+  }
+}
+
 @Riverpod(dependencies: [
   selectedFloorplanId,
   FloorplanManager,
@@ -52,9 +69,13 @@ class ContentViewController extends _$ContentViewController {
   FutureOr<ContentViewState> build() async {
     final floorplanId = ref.watch(selectedFloorplanIdProvider);
     final view = await _loadFloorplanView(floorplanId);
+
     return ContentViewState(
       floorplanId: floorplanId,
       view: view,
+      selectedTouchpointId: state.hasValue
+          ? state.value!.selectedTouchpointId ?? view.touchpoints.first.id
+          : view.touchpoints.first.id,
     );
   }
 
@@ -202,7 +223,7 @@ class TouchpointListSorting with _$TouchpointListSorting {
     bool ascending = true,
   }) =>
       TouchpointListSorting(
-        colIndex: 0,
+        colIndex: 1,
         sortFun: (items) => items
           ..sort((a, b) => a.touchpointId?.compareTo(b.touchpointId ?? 0) ?? 0),
         ascending: ascending,
@@ -210,7 +231,7 @@ class TouchpointListSorting with _$TouchpointListSorting {
 
   factory TouchpointListSorting.byType({bool ascending = true}) =>
       TouchpointListSorting(
-        colIndex: 1,
+        colIndex: 0,
         sortFun: (items) =>
             items..sort((a, b) => a.type.index.compareTo(b.type.index)),
         ascending: ascending,
@@ -225,14 +246,25 @@ class TouchpointListSorting with _$TouchpointListSorting {
         ascending: ascending,
       );
 
+  factory TouchpointListSorting.byStatus({
+    bool ascending = true,
+  }) =>
+      TouchpointListSorting(
+        colIndex: 3,
+        sortFun: (items) =>
+            items..sort((a, b) => a.statusLabel.compareTo(b.statusLabel)),
+        ascending: ascending,
+      );
+
   static TouchpointListSorting fromColIndex(
     int colIndex, {
     bool ascending = true,
   }) =>
       switch (colIndex) {
-        0 => TouchpointListSorting.byTouchpointId(ascending: ascending),
-        1 => TouchpointListSorting.byType(ascending: ascending),
+        0 => TouchpointListSorting.byType(ascending: ascending),
+        1 => TouchpointListSorting.byTouchpointId(ascending: ascending),
         2 => TouchpointListSorting.byInternalTitle(ascending: ascending),
+        3 => TouchpointListSorting.byStatus(ascending: ascending),
         _ => throw ArgumentError.value(
             colIndex, 'colIndex', 'Invalid column index'),
       };

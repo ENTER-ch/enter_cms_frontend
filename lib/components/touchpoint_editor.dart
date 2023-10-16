@@ -1,14 +1,15 @@
 import 'package:enter_cms_flutter/components/ag_touchpoint_editor.dart';
 import 'package:enter_cms_flutter/components/content_nav_widget.dart';
-import 'package:enter_cms_flutter/components/interactive_property_dropdown_field.dart';
-import 'package:enter_cms_flutter/components/interactive_property_text_field.dart';
+import 'package:enter_cms_flutter/models/checklist.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
+import 'package:enter_cms_flutter/pages/content/components/touchpoint_marker.dart';
 import 'package:enter_cms_flutter/providers/state/touchpoint_detail.dart';
 import 'package:enter_cms_flutter/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class TouchpointEditorWidget extends HookConsumerWidget {
+class TouchpointEditorWidget extends ConsumerWidget {
   const TouchpointEditorWidget({
     Key? key,
     required this.touchpointId,
@@ -18,220 +19,382 @@ class TouchpointEditorWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Widget buildTouchpointForm(MTouchpoint touchpoint) {
-      final idState = ref.watch(touchpointIdFieldProvider);
-      final titleState = ref.watch(touchpointInternalTitleFieldProvider);
-      final statusState = ref.watch(touchpointStatusFieldProvider);
-
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InteractivePropertyTextField(
-            labelText: 'ID',
-            loading: idState.isLoading,
-            error: idState.error?.toString(),
-            initialValue: idState.valueOrNull?.toString() ?? '',
-            onSave: (value) async {
-              final int? id = int.tryParse(value);
-              if (id == null) return;
-              ref.read(touchpointIdFieldProvider.notifier).updateValue(id);
-            },
-            onValidate: (value) async {
-              if (value.isEmpty) {
-                return 'ID is required';
-              }
-              if (int.tryParse(value) == null) {
-                return 'ID must be a number';
-              }
-              return null;
-            },
-          ),
-          InteractivePropertyTextField(
-            labelText: 'Title',
-            loading: titleState.isLoading,
-            error: titleState.error?.toString(),
-            initialValue: titleState.valueOrNull ?? '',
-            onSave: (value) async {
-              ref
-                  .read(touchpointInternalTitleFieldProvider.notifier)
-                  .updateValue(value);
-            },
-          ),
-          InteractivePropertyDropdownField(
-            labelText: 'Status',
-            loading: statusState.isLoading,
-            errorMessage: statusState.error?.toString(),
-            initialValue: statusState.valueOrNull ?? TouchpointStatus.draft,
-            items: const [
-              DropdownMenuItem(
-                value: TouchpointStatus.draft,
-                child: Text('Draft'),
-              ),
-              DropdownMenuItem(
-                value: TouchpointStatus.published,
-                child: Text('Published'),
-              ),
-            ],
-            onSave: (value) async {
-              ref
-                  .read(touchpointStatusFieldProvider.notifier)
-                  .updateValue(value);
-            },
-          ),
-        ],
-      );
-    }
-
-    final touchpoint = ref.watch(touchpointDetailStateProvider);
+    final state = ref.watch(touchpointProvider(touchpointId));
 
     return ContentNavWidget(
       title: const Text('Touchpoint'),
-      child: touchpoint.maybeWhen(
-        data: (touchpoint) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (touchpoint.status == TouchpointStatus.published &&
-                touchpoint.dirty == true)
-              _buildUnpublishedWarning(),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: buildTouchpointForm(touchpoint),
+      child: Column(
+        children: [
+          TouchpointListTile(
+            id: touchpointId,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Card(
+              elevation: 0,
+              clipBehavior: Clip.hardEdge,
+              child: TouchpointChecklist(
+                id: touchpointId,
+              ),
             ),
-            const Divider(),
-            if (touchpoint.type == TouchpointType.audioguide)
-              const AGTouchpointEditor(),
-            // if (widget.touchpoint?.type == TouchpointType.mediaplayer)
-            //   MPTouchpointEditor(
-            //     key: ValueKey(widget.touchpoint?.id),
-            //     touchpointEditorBloc: _touchpointEditorBloc,
-            //   ),
-          ],
-        ),
-        loading: () => const LinearProgressIndicator(),
-        orElse: () => const SizedBox.shrink(),
+          ),
+          const SizedBox(
+            height: 8.0,
+          ),
+          const Divider(),
+          switch (state.valueOrNull?.type) {
+            TouchpointType.audioguide => AGTouchpointEditor(
+                id: state.value!.agConfig!.id!,
+              ),
+            _ => const SizedBox.shrink(),
+          }
+        ],
+      ),
+    );
+  }
+}
+
+class TouchpointListTile extends HookConsumerWidget {
+  final int id;
+
+  const TouchpointListTile({
+    super.key,
+    required this.id,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(touchpointProvider(id));
+    final isEditing = useState(false);
+
+    Widget buildTile() => state.when(
+          data: (data) => ListTile(
+            title: Text(data.title),
+            leading: TouchpointMarker(
+              icon: data.type.icon,
+              label: data.touchpointIdString,
+              foregroundColor: data.type.color.computeLuminance() > 0.5
+                  ? Colors.black
+                  : Colors.white,
+              backgroundColor: data.type.color,
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                isEditing.value = true;
+              },
+            ),
+          ),
+          loading: () => const LinearProgressIndicator(),
+          error: (error, stackTrace) => ListTile(
+            title: Text(error.toString()),
+          ),
+        );
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: isEditing.value ? const EdgeInsets.all(8.0) : EdgeInsets.zero,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: !isEditing.value
+            ? buildTile()
+            : TouchpointEditTile(
+                id: id,
+                onSaved: () {
+                  isEditing.value = false;
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class TouchpointChecklist extends HookConsumerWidget {
+  final int id;
+
+  const TouchpointChecklist({
+    super.key,
+    required this.id,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(touchpointProvider(id));
+
+    buildDraft() => ListTile(
+          dense: true,
+          leading: const Icon(Icons.edit_square),
+          trailing: TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: () {
+              ref.read(touchpointProvider(id).notifier).updateTouchpoint(
+                    status: TouchpointStatus.published,
+                  );
+            },
+            child: const Text('Publish'),
+          ),
+          title: Text(
+            'Draft',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          subtitle: const Text(
+            'This Touchpoint is ready to be published.',
+          ),
+          tileColor:
+              Theme.of(context).colorScheme.inverseSurface.withOpacity(0.2),
+          textColor: Theme.of(context).colorScheme.onSurface,
+        );
+
+    buildPublished() => ListTile(
+          dense: true,
+          leading: const Icon(Icons.check_circle),
+          trailing: TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor:
+                  Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+            onPressed: () {
+              ref.read(touchpointProvider(id).notifier).updateTouchpoint(
+                    status: TouchpointStatus.draft,
+                  );
+            },
+            child: const Text('Unpublish'),
+          ),
+          title: Text(
+            'Published',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          subtitle: const Text(
+            'This Touchpoint is published but has unreleased changes.',
+          ),
+          tileColor: Theme.of(context).colorScheme.secondaryContainer,
+          textColor: Theme.of(context).colorScheme.onSecondaryContainer,
+        );
+
+    buildReleased() => ListTile(
+          dense: true,
+          leading: const Icon(Icons.check_circle),
+          trailing: TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor:
+                  Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+            onPressed: () {
+              ref.read(touchpointProvider(id).notifier).updateTouchpoint(
+                    status: TouchpointStatus.draft,
+                  );
+            },
+            child: const Text('Unpublish'),
+          ),
+          title: Text(
+            'Released',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          subtitle: const Text(
+            'This Touchpoint is available on devices.',
+          ),
+          tileColor: EnterThemeColors.green.withOpacity(0.5),
+          textColor: Theme.of(context).colorScheme.onSecondaryContainer,
+        );
+
+    buildChecklist(checklist) => checklist.map(
+          (MChecklistItem item) => ListTile(
+            dense: true,
+            leading: Icon(
+              item.type.icon,
+            ),
+            title: Text(
+              item.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            subtitle: item.message != null ? Text(item.message!) : null,
+            tileColor: item.type.color.withOpacity(0.5),
+          ),
+        );
+
+    return state.maybeWhen(
+      data: (touchpoint) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (touchpoint.checklist.isEmpty)
+            switch (touchpoint.status) {
+              TouchpointStatus.draft => buildDraft(),
+              TouchpointStatus.published =>
+                touchpoint.dirty == true ? buildPublished() : buildReleased(),
+              _ => const SizedBox.shrink(),
+            }
+          else
+            ...buildChecklist(touchpoint.checklist),
+        ],
+      ),
+      orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
+class TouchpointEditTile extends HookConsumerWidget {
+  final int id;
+  final void Function()? onSaved;
+
+  const TouchpointEditTile({
+    super.key,
+    required this.id,
+    this.onSaved,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final touchpoint = ref.watch(touchpointProvider(id));
+    final formKey = GlobalKey<FormState>();
+    final idController =
+        useTextEditingController(text: touchpoint.value?.touchpointIdString);
+    final internalTitleController =
+        useTextEditingController(text: touchpoint.value?.title);
+
+    return touchpoint.isLoading
+        ? const CircularProgressIndicator()
+        : Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Form(
+                key: formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTitle(context),
+                    const SizedBox(height: 8.0),
+                    _buildFormFields(idController, internalTitleController),
+                    _buildErrorText(touchpoint, context),
+                    const SizedBox(height: 8.0),
+                    _buildButtons(ref, formKey, idController,
+                        internalTitleController, context),
+                  ],
+                ),
+              ),
+            ),
+          );
+  }
+
+  Padding _buildTitle(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        'Edit Touchpoint',
+        style: Theme.of(context).textTheme.titleSmall,
       ),
     );
   }
 
-  Widget _buildUnpublishedWarning() {
-    return Container(
-      color: EnterThemeColors.orange,
+  Widget _buildFormFields(TextEditingController idController,
+      TextEditingController internalTitleController) {
+    return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: const Row(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning),
-          SizedBox(width: 8.0),
-          Expanded(
-            child: Text(
-                'This touchpoint has unreleased changes. Create a new Release to publish them.'),
-          ),
+          _buildIdField(idController),
+          const SizedBox(width: 8.0),
+          _buildInternalTitleField(internalTitleController),
         ],
       ),
     );
   }
 
-// final cmsApi = getIt<CmsApi>();
-//
-// late TouchpointEditorBloc _touchpointEditorBloc;
-//
-// final _idController = TextEditingController();
-// final _titleController = TextEditingController();
-//
-// @override
-// void initState() {
-//   super.initState();
-//   _touchpointEditorBloc = TouchpointEditorBloc(cmsApi: cmsApi);
-//   _initBloc(widget.touchpoint?.id);
-// }
-//
-// @override
-// void didUpdateWidget(covariant TouchpointEditorWidget oldWidget) {
-//   super.didUpdateWidget(oldWidget);
-//
-//   if (oldWidget.touchpoint?.id != widget.touchpoint?.id) {
-//     _initBloc(widget.touchpoint?.id);
-//   }
-// }
-//
-// void _initBloc(int? id) {
-//   if (id != null) {
-//     _touchpointEditorBloc.add(TouchpointEditorEventLoad(touchpointId: id));
-//   } else {
-//     _touchpointEditorBloc.add(const TouchpointEditorEventReset());
-//   }
-// }
-//
-// void _initForm(MTouchpoint touchpoint) {
-//   _titleController.text = touchpoint.internalTitle ?? '';
-//   _idController.text = touchpoint.touchpointId.toString();
-// }
-//
-// void _onTouchpointEditorStateChanged(
-//     BuildContext context, TouchpointEditorState state) {
-//   if (state is TouchpointEditorLoaded) {
-//     widget.onTouchpointLoaded?.call(state.touchpoint);
-//     _initForm(state.touchpoint);
-//   }
-// }
-//
-// @override
-// Widget build(BuildContext context) {
-//   return BlocConsumer<TouchpointEditorBloc, TouchpointEditorState>(
-//     bloc: _touchpointEditorBloc,
-//     listener: _onTouchpointEditorStateChanged,
-//     builder: (context, state) {
-//       if (state is TouchpointEditorLoading) {
-//         return const LinearProgressIndicator();
-//       }
-//       if (state is TouchpointEditorError) {
-//         return Text(state.message);
-//       }
-//       if (state is TouchpointEditorLoaded) {
-//         return ContentNavWidget(
-//           title: const Text('Touchpoint'),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               if (state.touchpoint.status == TouchpointStatus.published &&
-//                   state.touchpoint.dirty == true)
-//                 _buildUnpublishedWarning(),
-//               Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: _buildTouchpointForm(state),
-//               ),
-//               const Divider(),
-//               if (widget.touchpoint?.type == TouchpointType.audioguide)
-//                 AGTouchpointEditor(
-//                   key: ValueKey(widget.touchpoint?.id),
-//                   touchpointEditorBloc: _touchpointEditorBloc,
-//                 ),
-//               if (widget.touchpoint?.type == TouchpointType.mediaplayer)
-//                 MPTouchpointEditor(
-//                   key: ValueKey(widget.touchpoint?.id),
-//                   touchpointEditorBloc: _touchpointEditorBloc,
-//                 ),
-//             ],
-//           ),
-//         );
-//       }
-//       return const SizedBox();
-//     },
-//   );
-// }
-//
+  SizedBox _buildIdField(TextEditingController idController) {
+    return SizedBox(
+      width: 100,
+      child: TextFormField(
+        controller: idController,
+        validator: (value) =>
+            value == null || value.isEmpty ? 'Please enter ID' : null,
+        decoration: const InputDecoration(labelText: 'ID'),
+      ),
+    );
+  }
 
-//
-// Widget _buildUnpublishedWarning() {
-//   return Container(
-//     color: EnterThemeColors.orange,
-//     padding: const EdgeInsets.all(8.0),
-//     child: const Row(
-//       children: [
-//         Icon(Icons.warning),
-//         SizedBox(width: 8.0),
-//         Expanded(child: Text('This touchpoint has unreleased changes. Create a new Release to publish them.')),
-//       ],
-//     ),
-//   );
-// }
+  Expanded _buildInternalTitleField(
+      TextEditingController internalTitleController) {
+    return Expanded(
+      child: TextFormField(
+        controller: internalTitleController,
+        validator: (value) => value == null || value.isEmpty
+            ? 'Please enter Internal Title'
+            : null,
+        decoration: const InputDecoration(labelText: 'Internal Title'),
+      ),
+    );
+  }
+
+  Widget _buildErrorText(
+      AsyncValue<MTouchpoint> touchpoint, BuildContext context) {
+    return touchpoint.hasError
+        ? Column(
+            children: [
+              const SizedBox(height: 8.0),
+              Text(
+                touchpoint.error.toString(),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
+          )
+        : Container();
+  }
+
+  Row _buildButtons(
+      WidgetRef ref,
+      GlobalKey<FormState> formKey,
+      TextEditingController idController,
+      TextEditingController internalTitleController,
+      BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        _buildCancelButton(ref),
+        const SizedBox(width: 8.0),
+        _buildSaveButton(
+            ref, formKey, idController, internalTitleController, context),
+      ],
+    );
+  }
+
+  ElevatedButton _buildCancelButton(WidgetRef ref) {
+    return ElevatedButton(
+      onPressed: () {
+        ref.invalidate(touchpointProvider(id));
+        onSaved?.call();
+      },
+      child: const Text('Cancel'),
+    );
+  }
+
+  ElevatedButton _buildSaveButton(
+      WidgetRef ref,
+      GlobalKey<FormState> formKey,
+      TextEditingController idController,
+      TextEditingController internalTitleController,
+      BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+      onPressed: () async {
+        if (formKey.currentState!.validate()) {
+          await ref.read(touchpointProvider(id).notifier).updateTouchpoint(
+                touchpointId: int.parse(idController.text),
+                internalTitle: internalTitleController.text,
+              );
+          final state = ref.read(touchpointProvider(id));
+          state.whenData((data) => onSaved?.call());
+        }
+      },
+      child: const Text('Save'),
+    );
+  }
 }

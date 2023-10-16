@@ -5,10 +5,12 @@ class ContentNavWidget extends StatelessWidget {
     Key? key,
     this.title,
     this.child,
+    this.actions = const [],
   }) : super(key: key);
 
   final Widget? title;
   final Widget? child;
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +31,14 @@ class ContentNavWidget extends StatelessWidget {
     return DefaultTextStyle.merge(
       style: Theme.of(context).textTheme.titleSmall,
       child: Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 16.0),
-          child: Row(children: [
+        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 16.0),
+        child: Row(
+          children: [
             if (title != null) title!,
-          ])),
+            ...actions,
+          ],
+        ),
+      ),
     );
   }
 }

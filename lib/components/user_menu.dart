@@ -23,6 +23,7 @@ class UserMenu extends ConsumerWidget {
     showMenu(
       context: context,
       position: position,
+      elevation: 0,
       items: [
         PopupMenuItem(
           enabled: false,
@@ -64,23 +65,35 @@ class UserMenuPopup extends ConsumerWidget {
       child: Column(
         children: [
           ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(user.fullName),
             subtitle: Text("[${user.username}] ${user.email}"),
             leading: CircleAvatar(
               child: Text(user.initials),
             ),
           ),
-          const Divider(height: 16,),
-          if (user.isStaff == true) ListTile(
-            title: const Text('Admin panel'),
-            trailing: const Icon(Icons.settings, size: 20,),
-            onTap: () async {
-              await launchUrlString('/admin/');
-            },
+          const Divider(
+            height: 16,
           ),
+          if (user.isStaff == true)
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              title: const Text('Admin panel'),
+              trailing: const Icon(
+                Icons.settings,
+                size: 20,
+              ),
+              onTap: () async {
+                await launchUrlString('/admin/');
+              },
+            ),
           ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: const Text('Sign out'),
-            trailing: const Icon(Icons.logout, size: 20,),
+            trailing: const Icon(
+              Icons.logout,
+              size: 20,
+            ),
             onTap: () {
               Navigator.pop(context);
               ref.read(authControllerProvider.notifier).logout();
