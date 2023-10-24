@@ -24,7 +24,7 @@ jobs:
         run: flutter pub run build_runner build
 
       - name: Build Flutter Web App
-        run: flutter build web --debug
+        run: flutter build web 
 
       - name: Install zip
         uses: montudor/action-zip@v1
