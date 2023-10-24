@@ -11,7 +11,7 @@ class BeaconMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double radius = beacon.radius ?? 200.0;
+    final radius = beacon.radius ?? 200.0;
     return Transform.translate(
       offset: Offset(-radius / 2, -radius / 2),
       child: Container(

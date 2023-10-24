@@ -25,6 +25,7 @@ class MTouchpoint with _$MTouchpoint {
     @JsonKey(name: 'ag_config') MAGTouchpointConfig? agConfig,
     @JsonKey(name: 'mp_config') MMPTouchpointConfig? mpConfig,
     @Default([]) List<MChecklistItem> checklist,
+    @JsonKey(name: 'beacons') @Default([]) List<int> beaconIds,
   }) = _MTouchpoint;
 
   factory MTouchpoint.fromJson(Map<String, dynamic> json) =>

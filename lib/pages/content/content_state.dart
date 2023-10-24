@@ -28,7 +28,7 @@ enum ContentView {
 class SelectedContentView extends _$SelectedContentView {
   @override
   ContentView build() {
-    return ContentView.list;
+    return ContentView.map;
   }
 
   void set(ContentView view) {

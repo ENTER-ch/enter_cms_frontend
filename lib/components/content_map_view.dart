@@ -134,7 +134,7 @@ class ContentMapView extends ConsumerWidget {
         ..._beaconsInView(beacons, viewport).map((b) {
           final offset = b.position.toOffset();
           return Positioned(
-            key: ValueKey("beacon-${b.beaconId}"),
+            key: ValueKey("beacon-${b.id}"),
             left: offset.dx,
             top: offset.dy,
             child: BeaconMarker(

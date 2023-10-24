@@ -8,11 +8,12 @@ part 'beacon.g.dart';
 @freezed
 class MBeacon with _$MBeacon {
   const factory MBeacon({
-    @JsonKey(name: 'beacon_id')
-    required String beaconId,
+    int? id,
+    @JsonKey(name: 'beacon_id') String? beaconId,
     required MPosition position,
-    required MTouchpoint touchpoint,
+    @JsonKey(name: 'touchpoint') int? touchpointId,
     double? radius,
+    String? comment,
   }) = _MBeacon;
 
   factory MBeacon.fromJson(Map<String, dynamic> json) =>

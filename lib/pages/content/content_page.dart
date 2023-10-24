@@ -190,8 +190,11 @@ class ReleasePanel extends ConsumerWidget {
                     children: [
                       Icon(Icons.circle, color: release.status.color),
                       const SizedBox(width: 8.0),
-                      Text(
-                        "Latest Release: ${release.label}",
+                      Expanded(
+                        child: Text(
+                          "Latest Release: ${release.label}",
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -201,7 +204,6 @@ class ReleasePanel extends ConsumerWidget {
               ),
             ),
           ),
-          const Spacer(),
           const VerticalDivider(),
           ToolbarButton(
             icon: Icons.publish,

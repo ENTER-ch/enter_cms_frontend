@@ -30,14 +30,19 @@ class ContentNavWidget extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return DefaultTextStyle.merge(
       style: Theme.of(context).textTheme.titleSmall,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 16.0),
-        child: Row(
-          children: [
-            if (title != null) title!,
-            ...actions,
-          ],
-        ),
+      child: Row(
+        children: [
+          if (title != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 16.0),
+              child: title!,
+            ),
+          const Spacer(),
+          ...actions,
+          const SizedBox(
+            width: 8.0,
+          ),
+        ],
       ),
     );
   }

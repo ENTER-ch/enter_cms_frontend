@@ -131,37 +131,37 @@ class TouchpointEditorBloc
       }
     });
 
-    on<TouchpointEditorEventUpdateAGTouchpointConfig>((event, emit) async {
-      if (state is TouchpointEditorLoaded) {
-        final loadedState = state as TouchpointEditorLoaded;
-        final updatedTouchpoint = loadedState.touchpoint.copyWith(
-          agConfig: loadedState.touchpoint.agConfig?.copyWith(),
-        );
+    // on<TouchpointEditorEventUpdateAGTouchpointConfig>((event, emit) async {
+    //   if (state is TouchpointEditorLoaded) {
+    //     final loadedState = state as TouchpointEditorLoaded;
+    //     final updatedTouchpoint = loadedState.touchpoint.copyWith(
+    //       agConfig: loadedState.touchpoint.agConfig?.copyWith(),
+    //     );
 
-        emit(loadedState.copyWith(
-          touchpoint: updatedTouchpoint,
-          configLoading: true,
-          clearError: true,
-        ));
+    //     emit(loadedState.copyWith(
+    //       touchpoint: updatedTouchpoint,
+    //       configLoading: true,
+    //       clearError: true,
+    //     ));
 
-        try {
-          final result = await cmsApi.updateAGTouchpointConfig(
-            loadedState.touchpoint.agConfig!.id!,
-            playbackMode: event.playbackMode,
-          );
-          emit(TouchpointEditorLoaded(
-            touchpoint: result,
-            configLoading: false,
-          ));
-        } catch (e) {
-          log.severe(e);
-          emit(loadedState.copyWith(
-            configLoading: false,
-            configError: e.toString(),
-          ));
-        }
-      }
-    });
+    //     try {
+    //       final result = await cmsApi.updateAGTouchpointConfig(
+    //         loadedState.touchpoint.agConfig!.id!,
+    //         playbackMode: event.playbackMode,
+    //       );
+    //       emit(TouchpointEditorLoaded(
+    //         touchpoint: result,
+    //         configLoading: false,
+    //       ));
+    //     } catch (e) {
+    //       log.severe(e);
+    //       emit(loadedState.copyWith(
+    //         configLoading: false,
+    //         configError: e.toString(),
+    //       ));
+    //     }
+    //   }
+    // });
 
     on<TouchpointEditorEventUpdateAGContent>((event, emit) async {
       if (state is TouchpointEditorLoaded) {

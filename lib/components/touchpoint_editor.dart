@@ -1,8 +1,12 @@
 import 'package:enter_cms_flutter/components/ag_touchpoint_editor.dart';
 import 'package:enter_cms_flutter/components/content_nav_widget.dart';
+import 'package:enter_cms_flutter/components/toolbar_button.dart';
 import 'package:enter_cms_flutter/models/checklist.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:enter_cms_flutter/pages/content/components/touchpoint_marker.dart';
+import 'package:enter_cms_flutter/pages/content/content_state.dart';
+import 'package:enter_cms_flutter/providers/model/beacon_provider.dart';
+import 'package:enter_cms_flutter/providers/services/cms_api_provider.dart';
 import 'package:enter_cms_flutter/providers/state/touchpoint_detail.dart';
 import 'package:enter_cms_flutter/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +45,11 @@ class TouchpointEditorWidget extends ConsumerWidget {
           const SizedBox(
             height: 8.0,
           ),
+          const Divider(),
+          if (state.hasValue)
+            TouchpointBeaconsEditor(
+              id: state.value!.id!,
+            ),
           const Divider(),
           switch (state.valueOrNull?.type) {
             TouchpointType.audioguide => AGTouchpointEditor(
@@ -395,6 +404,70 @@ class TouchpointEditTile extends HookConsumerWidget {
         }
       },
       child: const Text('Save'),
+    );
+  }
+}
+
+class TouchpointBeaconsEditor extends ConsumerWidget {
+  final int id;
+
+  const TouchpointBeaconsEditor({
+    super.key,
+    required this.id,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final touchpoint = ref.watch(touchpointProvider(id));
+
+    onAddBeacon() async {
+      final cmsApi = ref.read(cmsApiProvider);
+      await cmsApi.createBeacon(touchpointId: id);
+      ref.invalidate(contentViewControllerProvider);
+    }
+
+    return ContentNavWidget(
+      title: const Text('Beacons'),
+      actions: [
+        ToolbarButton(
+          icon: Icons.add,
+          onTap: onAddBeacon,
+        ),
+      ],
+      child: touchpoint.maybeWhen(
+        data: (data) => Column(
+          children: [
+            for (final beaconId in data.beaconIds)
+              BeaconListTile(
+                id: beaconId,
+              ),
+          ],
+        ),
+        loading: () => const LinearProgressIndicator(),
+        orElse: () => const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+class BeaconListTile extends ConsumerWidget {
+  const BeaconListTile({
+    super.key,
+    required this.id,
+  });
+
+  final int id;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(beaconProvider(id));
+
+    return state.maybeWhen(
+      data: (beacon) => ListTile(
+        dense: true,
+        title: Text(beacon.beaconId ?? 'No ID'),
+      ),
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

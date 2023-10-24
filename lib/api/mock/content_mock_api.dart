@@ -140,7 +140,7 @@ class ContentMockApi extends ContentApi {
         .where((t) => t.position != null)
         .map((t) => MBeacon(
             beaconId: t.id.toString(),
-            touchpoint: t,
+            touchpointId: t.id,
             position: t.position!))
         .toList();
   }
@@ -167,18 +167,18 @@ class ContentMockApi extends ContentApi {
 
     if (touchpoint.position != null) {
       final beacon = _beacons.firstWhereOrNull(
-        (b) => b.touchpoint.id == touchpoint.id,
+        (b) => b.touchpointId == touchpoint.id,
       );
       if (beacon != null) {
         _beacons = _beacons
-            .map((b) => b.touchpoint.id == touchpoint.id
+            .map((b) => b.touchpointId == touchpoint.id
                 ? beacon.copyWith(position: touchpoint.position!)
                 : b)
             .toList();
       } else {
         _beacons.add(MBeacon(
           beaconId: touchpoint.id.toString(),
-          touchpoint: touchpoint,
+          touchpointId: touchpoint.id,
           position: touchpoint.position!,
         ));
       }
@@ -199,7 +199,7 @@ class ContentMockApi extends ContentApi {
     if (newTouchpoint.position != null) {
       createBeacon(MBeacon(
         beaconId: newTouchpoint.id.toString(),
-        touchpoint: newTouchpoint,
+        touchpointId: newTouchpoint.id,
         position: newTouchpoint.position!,
       ));
     }
@@ -385,7 +385,9 @@ class ContentMockApi extends ContentApi {
 
   @override
   Future<MBeacon> updateBeacon(MBeacon beacon) {
-    _beacons = _beacons.map((b) => b.beaconId == beacon.beaconId ? beacon : b).toList();
+    _beacons = _beacons
+        .map((b) => b.beaconId == beacon.beaconId ? beacon : b)
+        .toList();
     return Future.delayed(_lagDuration, () => beacon);
   }
 
@@ -397,18 +399,13 @@ class ContentMockApi extends ContentApi {
 
   @override
   Future<MBeacon> getBeacon({required String beaconId}) {
-    return Future.delayed(
-        _lagDuration,
+    return Future.delayed(_lagDuration,
         () => _beacons.firstWhere((beacon) => beacon.beaconId == beaconId));
   }
 
   @override
   Future<List<MBeacon>> getBeaconsOfFloorplan({required int floorplanId}) {
-    return Future.delayed(
-        _lagDuration,
-        () => _beacons
-            .where((beacon) => beacon.touchpoint.position?.parentId == floorplanId)
-            .toList());
+    return Future.delayed(_lagDuration, () => _beacons.toList());
   }
 
   @override

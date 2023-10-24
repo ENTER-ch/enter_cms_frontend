@@ -4,6 +4,7 @@ import 'package:enter_cms_flutter/api/cms_api.dart';
 import 'package:enter_cms_flutter/api/rest/rest_api.dart';
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
+import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/floorplan.dart';
 import 'package:enter_cms_flutter/models/floorplan_view.dart';
 import 'package:enter_cms_flutter/models/media_track.dart';
@@ -234,5 +235,52 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
   Future<MRelease> getRelease(int id) async {
     final response = await get('/cms/releases/$id/');
     return MRelease.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<MBeacon> createBeacon(
+      {required int touchpointId,
+      String? beaconId,
+      MPosition? position,
+      double? radius}) async {
+    final response = await post(
+      '/cms/beacons/',
+      data: {
+        'touchpoint': touchpointId,
+        'beacon_id': beaconId,
+        'position': position?.toJson(),
+        'radius': radius ?? 200,
+      },
+    );
+    return MBeacon.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> deleteBeacon(int id) async {
+    await delete('/cms/beacons/$id/');
+  }
+
+  @override
+  Future<MBeacon> getBeacon(int id) async {
+    final response = await get('/cms/beacons/$id/');
+    return MBeacon.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<MBeacon> updateBeacon(int id,
+      {String? beaconId,
+      MPosition? position,
+      MTouchpoint? touchpoint,
+      double? radius}) async {
+    final response = await put(
+      '/cms/beacons/$id/',
+      data: {
+        'beacon_id': beaconId,
+        'position': position?.toJson(),
+        'touchpoint': touchpoint?.toJson(),
+        'radius': radius,
+      },
+    );
+    return MBeacon.fromJson(response.data as Map<String, dynamic>);
   }
 }
