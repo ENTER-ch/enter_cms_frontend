@@ -84,6 +84,8 @@ class CreateTouchpointTool extends ContentTool {
         .read(contentViewControllerProvider.notifier)
         .updateTouchpoint(touchpoint, select: true);
 
+    ref.invalidate(contentViewControllerProvider);
+
     ref.read(contentMapToolControllerProvider.notifier).cancelTool();
   }
 }
