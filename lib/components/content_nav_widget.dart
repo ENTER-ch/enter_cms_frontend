@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class ContentNavWidget extends StatelessWidget {
   const ContentNavWidget({
-    Key? key,
+    super.key,
     this.title,
     this.child,
     this.actions = const [],
-  }) : super(key: key);
+  });
 
   final Widget? title;
   final Widget? child;

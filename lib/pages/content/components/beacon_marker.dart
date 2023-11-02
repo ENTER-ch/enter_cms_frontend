@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 class BeaconMarker extends StatelessWidget {
   const BeaconMarker({
-    Key? key,
+    super.key,
     required this.beacon,
-  }) : super(key: key);
+  });
 
   final MBeacon beacon;
 

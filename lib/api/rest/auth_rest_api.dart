@@ -1,11 +1,10 @@
-import 'package:dio/dio.dart';
 import 'package:enter_cms_flutter/api/auth_api.dart';
 import 'package:enter_cms_flutter/api/rest/rest_api.dart';
 import 'package:enter_cms_flutter/models/token.dart';
 import 'package:enter_cms_flutter/models/user.dart';
 
 class AuthRestApi extends EnterRestApi implements AuthApi {
-  AuthRestApi({required Dio dio}) : super(dio: dio);
+  AuthRestApi({required super.dio});
 
   @override
   Future<void> configureToken({required MToken token}) async {
@@ -14,7 +13,8 @@ class AuthRestApi extends EnterRestApi implements AuthApi {
 
   @override
   Future<void> verifyToken({required MToken token}) async {
-    await post('/token/verify/',
+    await post(
+      '/token/verify/',
       data: {
         'token': token.access,
       },
@@ -23,7 +23,8 @@ class AuthRestApi extends EnterRestApi implements AuthApi {
 
   @override
   Future<MToken> refreshToken({required MToken token}) async {
-    final response = await post('/token/refresh/',
+    final response = await post(
+      '/token/refresh/',
       data: {
         'refresh': token.refresh,
       },
@@ -36,8 +37,10 @@ class AuthRestApi extends EnterRestApi implements AuthApi {
   }
 
   @override
-  Future<MToken> login({required String username, required String password}) async {
-    final response = await post('/token/',
+  Future<MToken> login(
+      {required String username, required String password}) async {
+    final response = await post(
+      '/token/',
       data: {
         'username': username,
         'password': password,

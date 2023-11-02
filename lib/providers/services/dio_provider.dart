@@ -10,7 +10,7 @@ part 'dio_provider.g.dart';
 Dio dio(DioRef ref) {
   final log = Logger('DioProvider');
 
-  String baseUrl = 'http://localhost:8000';
+  String baseUrl = 'http://localhost:8000/';
   if (!kDebugMode && kIsWeb) {
     baseUrl = '${html.window.location.origin}/';
   }

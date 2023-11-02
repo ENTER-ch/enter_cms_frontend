@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class ContentToolbar extends ConsumerWidget {
-  const ContentToolbar({Key? key}) : super(key: key);
+  const ContentToolbar({super.key});
 
   Widget _buildCancelIntentButton(BuildContext context, WidgetRef ref) {
     return Container(
@@ -160,12 +160,12 @@ class CreateTouchpointButton extends ConsumerWidget {
   final TouchpointType type;
 
   const CreateTouchpointButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.tooltipText,
     required this.type,
-  }) : super(key: key);
+  });
 
   void _onCreateTouchpoint(WidgetRef ref) {
     ref.read(selectedContentViewProvider.notifier).set(ContentView.map);

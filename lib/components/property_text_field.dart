@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PropertyTextField extends StatelessWidget {
   const PropertyTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.labelText,
     this.hintText,
@@ -12,7 +12,7 @@ class PropertyTextField extends StatelessWidget {
     this.suffix,
     this.labelMinWidth,
     this.onSubmitted,
-  }) : super(key: key);
+  });
 
   final TextEditingController? controller;
   final String? labelText;
@@ -37,7 +37,8 @@ class PropertyTextField extends StatelessWidget {
           hintText: hintText,
           helperText: helperText,
           errorText: errorText,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
           prefixIcon: _buildPrefixLabel(context),
           prefixIconConstraints: BoxConstraints(minWidth: labelMinWidth ?? 48),
           suffixIcon: suffix,

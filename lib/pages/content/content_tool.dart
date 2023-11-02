@@ -49,9 +49,9 @@ class CreateTouchpointTool extends ContentTool {
   final TouchpointType type;
 
   CreateTouchpointTool(
-    WidgetRef ref, {
+    super.ref, {
     required this.type,
-  }) : super(ref);
+  });
 
   @override
   Widget get cursor {
@@ -82,7 +82,7 @@ class CreateTouchpointTool extends ContentTool {
 
     ref
         .read(contentViewControllerProvider.notifier)
-        .updateTouchpoint(touchpoint, select: true);
+        .updateTouchpointInView(touchpoint, select: true);
 
     ref.invalidate(contentViewControllerProvider);
 

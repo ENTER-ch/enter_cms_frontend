@@ -11,10 +11,10 @@ GetIt getIt = GetIt.instance;
 
 class AGContentPreview extends StatefulWidget {
   const AGContentPreview({
-    Key? key,
+    super.key,
     required this.content,
     this.touchpointId = 0,
-  }) : super(key: key);
+  });
 
   final int? touchpointId;
   final MAGContent content;

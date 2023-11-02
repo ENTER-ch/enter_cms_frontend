@@ -6,8 +6,8 @@ import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:enter_cms_flutter/pages/content/components/touchpoint_marker.dart';
 import 'package:enter_cms_flutter/pages/content/content_state.dart';
 import 'package:enter_cms_flutter/providers/model/beacon_provider.dart';
+import 'package:enter_cms_flutter/providers/model/touchpoint_provider.dart';
 import 'package:enter_cms_flutter/providers/services/cms_api_provider.dart';
-import 'package:enter_cms_flutter/providers/state/touchpoint_detail.dart';
 import 'package:enter_cms_flutter/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -15,9 +15,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class TouchpointEditorWidget extends ConsumerWidget {
   const TouchpointEditorWidget({
-    Key? key,
+    super.key,
     required this.touchpointId,
-  }) : super(key: key);
+  });
 
   final int touchpointId;
 

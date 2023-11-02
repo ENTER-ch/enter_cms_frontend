@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 
 class MainNavigationRail extends StatelessWidget {
   const MainNavigationRail({
-    Key? key,
+    super.key,
     required this.routerState,
-  }) : super(key: key);
+  });
 
   final GoRouterState routerState;
 

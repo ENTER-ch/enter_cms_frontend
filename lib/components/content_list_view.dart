@@ -1,5 +1,4 @@
 import 'package:data_table_2/data_table_2.dart';
-import 'package:enter_cms_flutter/components/content_nav_widget.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:enter_cms_flutter/pages/content/content_state.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ContentListView extends ConsumerStatefulWidget {
   const ContentListView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState<ContentListView> createState() => _ContentListViewState();

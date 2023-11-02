@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:enter_cms_flutter/models/position.dart';
-import 'package:enter_cms_flutter/models/touchpoint.dart';
 
 part 'beacon.freezed.dart';
 part 'beacon.g.dart';

@@ -3,11 +3,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class EnterLogo extends StatelessWidget {
   const EnterLogo({
-    Key? key,
+    super.key,
     this.width,
     this.height,
     this.color,
-  }) : super(key: key);
+  });
 
   final double? width;
   final double? height;
@@ -18,14 +18,11 @@ class EnterLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final Widget svgPicture = SvgPicture.asset(
-        assetName,
+    final Widget svgPicture = SvgPicture.asset(assetName,
         width: width,
         height: height,
         color: color,
-        semanticsLabel: 'ENTER Logo'
-    );
+        semanticsLabel: 'ENTER Logo');
 
     return svgPicture;
   }

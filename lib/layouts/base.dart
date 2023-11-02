@@ -5,10 +5,10 @@ import 'package:go_router/go_router.dart';
 
 class BaseLayout extends StatelessWidget {
   const BaseLayout({
-    Key? key,
+    super.key,
     this.child,
     this.routerState,
-  }) : super(key: key);
+  });
 
   final GoRouterState? routerState;
   final Widget? child;

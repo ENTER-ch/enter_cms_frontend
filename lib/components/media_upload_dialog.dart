@@ -11,7 +11,7 @@ import 'package:logging/logging.dart';
 final GetIt getIt = GetIt.instance;
 
 class MediaUploadDialog extends ConsumerStatefulWidget {
-  const MediaUploadDialog({Key? key}) : super(key: key);
+  const MediaUploadDialog({super.key});
 
   @override
   ConsumerState<MediaUploadDialog> createState() => _MediaUploadDialogState();
@@ -81,8 +81,8 @@ class _MediaUploadDialogState extends ConsumerState<MediaUploadDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _canPop,
+    return PopScope(
+      onPopInvoked: (value) => _canPop,
       child: AlertDialog(
         title: const Text('Upload Media'),
         content: SizedBox(

@@ -12,11 +12,11 @@ class PanZoomMapView extends StatefulWidget {
   final void Function(Offset position)? onTap;
 
   const PanZoomMapView({
-    Key? key,
+    super.key,
     this.floorplan,
     this.overlayBuilder,
     this.onTap,
-  }) : super(key: key);
+  });
 
   static bool isPositionInView(Offset position, vector_math.Quad viewport) {
     return viewport.point0.x <= position.dx &&

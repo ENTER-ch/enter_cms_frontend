@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 class InteractivePropertyTextField extends StatefulWidget {
   const InteractivePropertyTextField({
-    Key? key,
+    super.key,
     this.labelText,
     this.helperText,
     this.maxLines,
@@ -15,7 +15,7 @@ class InteractivePropertyTextField extends StatefulWidget {
     this.loading,
     this.error,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   final String? labelText;
   final String? helperText;

@@ -8,7 +8,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 final GetIt getIt = GetIt.instance;
 
 class UserMenu extends ConsumerWidget {
-  const UserMenu({Key? key}) : super(key: key);
+  const UserMenu({super.key});
 
   void _showUserMenuPopup(BuildContext context, MUser user) {
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
@@ -54,9 +54,9 @@ class UserMenuPopup extends ConsumerWidget {
   final MUser user;
 
   const UserMenuPopup({
-    Key? key,
+    super.key,
     required this.user,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

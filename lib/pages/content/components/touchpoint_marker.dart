@@ -4,7 +4,7 @@ enum TouchpointMarkerStyle { tiny, icon, full }
 
 class TouchpointMarker extends StatelessWidget {
   const TouchpointMarker({
-    Key? key,
+    super.key,
     this.style = TouchpointMarkerStyle.full,
     this.icon = Icons.location_on,
     this.label,
@@ -12,7 +12,7 @@ class TouchpointMarker extends StatelessWidget {
     this.foregroundColor,
     this.backgroundColor,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final TouchpointMarkerStyle style;
 

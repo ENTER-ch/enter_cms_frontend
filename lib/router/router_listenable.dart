@@ -36,6 +36,7 @@ class RouterListenable extends _$RouterListenable implements Listenable {
   }
 
   /// Redirects the user when our authentication changes
+// ignore: avoid_build_context_in_providers
   String? redirect(BuildContext context, GoRouterState state) {
     // Splash: On authed, redirect to from=, else no redirect
     // Login: On authed, redirect to from=, else no redirect

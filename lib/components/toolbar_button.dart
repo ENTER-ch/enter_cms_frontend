@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class ToolbarButton extends StatelessWidget {
   const ToolbarButton({
-    Key? key,
+    super.key,
     required this.icon,
     this.label,
     this.tooltipText,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String? label;
@@ -27,9 +27,14 @@ class ToolbarButton extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Icon(icon, size: 20,),
+                Icon(
+                  icon,
+                  size: 20,
+                ),
                 if (label != null) ...[
-                  const SizedBox(width: 8,),
+                  const SizedBox(
+                    width: 8,
+                  ),
                   Text(label!),
                 ],
               ],
@@ -41,10 +46,12 @@ class ToolbarButton extends StatelessWidget {
   }
 
   Widget _buildTooltip(BuildContext context, {required Widget child}) {
-    return tooltipText != null ? Tooltip(
-      message: tooltipText,
-      waitDuration: const Duration(milliseconds: 500),
-      child: child,
-    ) : child;
+    return tooltipText != null
+        ? Tooltip(
+            message: tooltipText,
+            waitDuration: const Duration(milliseconds: 500),
+            child: child,
+          )
+        : child;
   }
 }

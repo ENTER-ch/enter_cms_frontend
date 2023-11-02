@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class InlineAudioPlayer extends ConsumerStatefulWidget {
   const InlineAudioPlayer({
-    Key? key,
+    super.key,
     required this.url,
-  }) : super(key: key);
+  });
 
   final String url;
 

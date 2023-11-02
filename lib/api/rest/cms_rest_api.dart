@@ -17,7 +17,7 @@ import 'package:http_parser/http_parser.dart' as http_parser;
 import 'package:mime/mime.dart';
 
 class CmsRestApi extends EnterRestApi implements CmsApi {
-  CmsRestApi({required Dio dio}) : super(dio: dio);
+  CmsRestApi({required super.dio});
 
   @override
   Future<MFloorplan> uploadFloorplan(XFile image,
@@ -100,6 +100,7 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
     return MTouchpoint.fromJson(response.data as Map<String, dynamic>);
   }
 
+  @override
   Future<MAGTouchpointConfig> getAGTouchpointConfig(int id) async {
     final response = await get('/cms/touchpoints/ag/$id/');
     return MAGTouchpointConfig.fromJson(response.data as Map<String, dynamic>);

@@ -98,7 +98,7 @@ class ContentViewController extends _$ContentViewController {
     }
   }
 
-  Future<void> updateTouchpoint(
+  Future<void> updateTouchpointInView(
     MTouchpoint touchpoint, {
     bool select = false,
     bool refresh = true,
@@ -153,17 +153,6 @@ int? selectedTouchpointId(SelectedTouchpointIdRef ref) {
         data: (state) => state.selectedTouchpointId,
         orElse: () => null,
       );
-}
-
-@Riverpod(dependencies: [
-  selectedTouchpointId,
-  touchpointsInView,
-])
-MTouchpoint? selectedTouchpoint(SelectedTouchpointRef ref) {
-  final touchpointId = ref.watch(selectedTouchpointIdProvider);
-  if (touchpointId == null) return null;
-  final touchpoints = ref.watch(touchpointsInViewProvider);
-  return touchpoints.firstWhere((element) => element.id == touchpointId);
 }
 
 @freezed

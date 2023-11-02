@@ -7,7 +7,7 @@ import 'package:get_it/get_it.dart';
 final GetIt getIt = GetIt.instance;
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();

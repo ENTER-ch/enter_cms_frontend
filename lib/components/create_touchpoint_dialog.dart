@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 class CreateTouchpointDialog extends StatefulWidget {
   const CreateTouchpointDialog({
-    Key? key,
+    super.key,
     required this.type,
-  }) : super(key: key);
+  });
 
   final TouchpointType type;
 
@@ -14,7 +14,6 @@ class CreateTouchpointDialog extends StatefulWidget {
 }
 
 class _CreateTouchpointDialogState extends State<CreateTouchpointDialog> {
-
   @override
   Widget build(BuildContext context) {
     return const AlertDialog(

@@ -42,7 +42,7 @@ final PageTransitionsTheme pageTransitionsTheme =
 });
 
 const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
-  border: const OutlineInputBorder(),
+  border: OutlineInputBorder(),
   isDense: true,
 );
 

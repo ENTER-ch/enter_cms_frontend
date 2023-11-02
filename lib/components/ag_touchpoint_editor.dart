@@ -5,10 +5,11 @@ import 'package:enter_cms_flutter/components/inline_audio_player.dart';
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/media_track.dart';
-import 'package:enter_cms_flutter/pages/content/content_state.dart';
+import 'package:enter_cms_flutter/providers/model/ag_config_provider.dart';
+import 'package:enter_cms_flutter/providers/model/ag_content_provider.dart';
+import 'package:enter_cms_flutter/providers/model/media_track_provider.dart';
+import 'package:enter_cms_flutter/providers/model/touchpoint_provider.dart';
 import 'package:enter_cms_flutter/providers/services/cms_api_provider.dart';
-import 'package:enter_cms_flutter/providers/state/touchpoint_detail.dart';
-import 'package:enter_cms_flutter/theme/theme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -21,9 +22,9 @@ class AGTouchpointEditor extends HookConsumerWidget {
   final int id;
 
   const AGTouchpointEditor({
-    Key? key,
+    super.key,
     required this.id,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,11 +41,9 @@ class AGTouchpointEditor extends HookConsumerWidget {
               title: const Text("Content"),
               child: Column(
                 children: [
-                  ...config.contents
-                      .map(
-                        (e) => AGContentListTile(id: e.id!),
-                      )
-                      .toList(),
+                  ...config.contents.map(
+                    (e) => AGContentListTile(id: e.id!),
+                  ),
                   ListTile(
                     dense: true,
                     leading: const Icon(Icons.add),
@@ -524,7 +523,6 @@ class MediaUploadListTile extends HookConsumerWidget {
       isUploading.value = false;
       uploadedTracks.value = uploadedTracks.value..addAll(result);
       onUpload?.call(result.first);
-      print(uploadedTracks.value);
     }
 
     onPickFile() async {

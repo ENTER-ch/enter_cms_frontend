@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class InteractivePropertyDropdownField extends StatefulWidget {
   const InteractivePropertyDropdownField({
-    Key? key,
+    super.key,
     required this.items,
     this.initialValue,
     this.labelText,
@@ -12,7 +12,7 @@ class InteractivePropertyDropdownField extends StatefulWidget {
     this.loading,
     this.errorMessage,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   final List<DropdownMenuItem<dynamic>> items;
   final dynamic initialValue;

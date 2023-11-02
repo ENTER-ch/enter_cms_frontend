@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PropertyDropdownField extends StatefulWidget {
   const PropertyDropdownField({
-    Key? key,
+    super.key,
     required this.items,
     this.onChanged,
     this.value,
@@ -11,7 +11,7 @@ class PropertyDropdownField extends StatefulWidget {
     this.errorText,
     this.suffix,
     this.labelMinWidth,
-  }) : super(key: key);
+  });
   final List<DropdownMenuItem<dynamic>> items;
   final void Function(dynamic)? onChanged;
 
@@ -66,9 +66,11 @@ class _PropertyDropdownFieldState extends State<PropertyDropdownField> {
         isDense: true,
         helperText: widget.helperText,
         errorText: widget.errorText,
-        contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
         prefixIcon: _buildPrefixLabel(context),
-        prefixIconConstraints: BoxConstraints(minWidth: widget.labelMinWidth ?? 48),
+        prefixIconConstraints:
+            BoxConstraints(minWidth: widget.labelMinWidth ?? 48),
         suffixIconConstraints: const BoxConstraints(maxWidth: 80),
         enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide.none,
@@ -76,15 +78,15 @@ class _PropertyDropdownFieldState extends State<PropertyDropdownField> {
         border: const OutlineInputBorder(),
       ),
       child: DropdownButtonHideUnderline(
-          child: DropdownButton(
-            focusNode: _focusNode,
-            isDense: true,
-            style: Theme.of(context).textTheme.bodyMedium,
-            icon: widget.suffix,
-            value: widget.value,
-            items: widget.items,
-            onChanged: widget.onChanged,
-          ),
+        child: DropdownButton(
+          focusNode: _focusNode,
+          isDense: true,
+          style: Theme.of(context).textTheme.bodyMedium,
+          icon: widget.suffix,
+          value: widget.value,
+          items: widget.items,
+          onChanged: widget.onChanged,
+        ),
       ),
     );
   }

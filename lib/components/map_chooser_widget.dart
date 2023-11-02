@@ -8,8 +8,8 @@ import 'package:go_router/go_router.dart';
 
 class MapChooserWidget extends ConsumerWidget {
   const MapChooserWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   void _onSelectFloorplan(
       BuildContext context, WidgetRef ref, int floorplanId) {
