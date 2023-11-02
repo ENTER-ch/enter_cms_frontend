@@ -56,7 +56,7 @@ class _InlineAudioPlayerState extends ConsumerState<InlineAudioPlayer> {
 
   String _getUrl(String url) {
     final dio = ref.read(dioProvider);
-    return url.contains('http') ? url : "${dio.options.baseUrl}/$url";
+    return url.contains('http') ? url : "${dio.options.baseUrl}$url";
   }
 
   void _onPlayPausePressed() {
