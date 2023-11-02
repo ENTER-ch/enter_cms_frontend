@@ -11,9 +11,9 @@ Dio dio(DioRef ref) {
   final log = Logger('DioProvider');
 
   String baseUrl = 'http://localhost:8000';
-  if (!kDebugMode && kIsWeb) {
-    baseUrl = '${html.window.location.origin}/';
-  }
+  // if (!kDebugMode && kIsWeb) {
+  //   baseUrl = '${html.window.location.origin}/';
+  // }
   log.info('Base URL: $baseUrl');
 
   final dio = Dio();
