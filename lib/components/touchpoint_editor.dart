@@ -29,6 +29,17 @@ class TouchpointEditorWidget extends ConsumerWidget {
 
     return ContentNavWidget(
       title: const Text('Touchpoint'),
+      actions: [
+        ToolbarButton(
+          icon: Icons.open_with,
+          tooltipText: 'Move Touchpoint',
+          onTap: () {
+            ref
+                .read(contentMapToolControllerProvider.notifier)
+                .selectTool(MoveTouchpointTool(ref, touchpoint: state.value!));
+          },
+        )
+      ],
       child: Column(
         children: [
           TouchpointListTile(

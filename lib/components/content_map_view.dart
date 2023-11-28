@@ -86,10 +86,16 @@ class ContentMapView extends HookConsumerWidget {
   }) {
     final touchpoints = ref.watch(touchpointsInViewProvider);
     final selectedTouchpointId = ref.watch(selectedTouchpointIdProvider);
+    final currentTool = ref.watch(contentMapToolControllerProvider);
 
     return Stack(
       children: [
-        ..._touchpointsInView(touchpoints, viewport).map((t) {
+        ..._touchpointsInView(touchpoints, viewport).where(
+          (element) {
+            return currentTool is! MoveTouchpointTool ||
+                currentTool.touchpoint.id != element.id;
+          },
+        ).map((t) {
           final offset = t.position!.toOffset();
           return Positioned(
             key: ValueKey(t.id),

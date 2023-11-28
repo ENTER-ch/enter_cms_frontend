@@ -93,8 +93,8 @@ class FloorplanSelector extends ConsumerWidget {
     final floorplans = ref.watch(floorplanManagerProvider);
     final selectedFloorplan = ref.watch(selectedFloorplanProvider);
 
-    return SizedBox(
-      width: 100,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 100),
       child: Tooltip(
         message: 'Select Floorplan',
         child: DropdownButton<MFloorplan>(
@@ -110,7 +110,10 @@ class FloorplanSelector extends ConsumerWidget {
                 .map(
                   (MFloorplan el) => DropdownMenuItem<MFloorplan>(
                     value: el,
-                    child: Text(el.title ?? 'Untitled'),
+                    child: Text(
+                      el.title ?? 'Untitled',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 )
                 .toList(),

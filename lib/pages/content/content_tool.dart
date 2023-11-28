@@ -92,6 +92,48 @@ class CreateTouchpointTool extends ContentTool {
   }
 }
 
+class MoveTouchpointTool extends ContentTool {
+  final MTouchpoint touchpoint;
+
+  MoveTouchpointTool(
+    super.ref, {
+    required this.touchpoint,
+  });
+
+  @override
+  Widget get cursor {
+    final bgColor = touchpoint.type.color;
+    return Transform.translate(
+      offset: const Offset(-74 / 2, -34 / 2),
+      child: TouchpointMarker(
+        style: TouchpointMarkerStyle.icon,
+        icon: touchpoint.type.icon,
+        backgroundColor: bgColor,
+        foregroundColor:
+            bgColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+      ),
+    );
+  }
+
+  @override
+  Future<void> onMapClicked(double x, double y) async {
+    final floorplanId = ref.read(selectedFloorplanIdProvider);
+
+    final cmsApi = ref.read(cmsApiProvider);
+    await cmsApi.updateTouchpoint(
+      touchpoint.id!,
+      position: MPosition(
+        parentId: floorplanId,
+        x: x,
+        y: y,
+      ),
+    );
+
+    ref.invalidate(contentViewControllerProvider);
+    ref.read(contentMapToolControllerProvider.notifier).cancelTool();
+  }
+}
+
 class MoveBeaconTool extends ContentTool {
   final MBeacon beacon;
 
