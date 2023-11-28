@@ -276,9 +276,9 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
     final response = await put(
       '/cms/beacons/$id/',
       data: {
-        'beacon_id': beaconId,
+        if (beaconId != null) 'beacon_id': beaconId,
         if (position != null) 'position': position.toJson(),
-        if (touchpoint != null) 'touchpoint': touchpoint?.toJson(),
+        if (touchpoint != null) 'touchpoint': touchpoint.toJson(),
         if (radius != null) 'radius': radius,
       },
     );

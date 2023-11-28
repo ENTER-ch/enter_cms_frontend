@@ -26,6 +26,8 @@ class ContentMapToolController extends _$ContentMapToolController {
 
     state = tool;
     tool.onCreated();
+
+    ref.read(selectedContentViewProvider.notifier).set(ContentView.map);
   }
 
   void cancelTool() {
