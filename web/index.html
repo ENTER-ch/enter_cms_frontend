@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -27,9 +28,9 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>ENTER Content Management System</title>
+  <title>ENTER CMS [Loading]</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="index.css">
 
@@ -40,17 +41,18 @@
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
+
 <body>
   <script>
-    window.addEventListener('load', function(ev) {
+    window.addEventListener('load', function (ev) {
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         }
-      }).then(function(engineInitializer) {
+      }).then(function (engineInitializer) {
         return engineInitializer.initializeEngine();
-      }).then(function(appRunner) {
+      }).then(function (appRunner) {
         return appRunner.runApp();
         document.querySelector('.preload').style.display = 'none';
       });
@@ -59,8 +61,9 @@
   <div class="preload">
     <div class="preload__container">
       <img src="/assets/assets/svg/enter-logo.svg" alt="ENTER">
-      <progress class="pure-material-progress-circular"/>
+      <progress class="pure-material-progress-circular" />
     </div>
   </div>
 </body>
+
 </html>
