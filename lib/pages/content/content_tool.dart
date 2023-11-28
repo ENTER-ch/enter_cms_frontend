@@ -1,5 +1,7 @@
+import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/position.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
+import 'package:enter_cms_flutter/pages/content/components/beacon_marker.dart';
 import 'package:enter_cms_flutter/pages/content/components/touchpoint_marker.dart';
 import 'package:enter_cms_flutter/pages/content/content_state.dart';
 import 'package:enter_cms_flutter/providers/services/cms_api_provider.dart';
@@ -86,6 +88,39 @@ class CreateTouchpointTool extends ContentTool {
 
     ref.invalidate(contentViewControllerProvider);
 
+    ref.read(contentMapToolControllerProvider.notifier).cancelTool();
+  }
+}
+
+class MoveBeaconTool extends ContentTool {
+  final MBeacon beacon;
+
+  MoveBeaconTool(
+    super.ref, {
+    required this.beacon,
+  });
+
+  @override
+  Widget get cursor => BeaconMarker(
+        beacon: beacon,
+        forcedRadius: 100,
+      );
+
+  @override
+  Future<void> onMapClicked(double x, double y) async {
+    final floorplanId = ref.read(selectedFloorplanIdProvider);
+
+    final cmsApi = ref.read(cmsApiProvider);
+    await cmsApi.updateBeacon(
+      beacon.id!,
+      position: MPosition(
+        parentId: floorplanId,
+        x: x,
+        y: y,
+      ),
+    );
+
+    ref.invalidate(contentViewControllerProvider);
     ref.read(contentMapToolControllerProvider.notifier).cancelTool();
   }
 }

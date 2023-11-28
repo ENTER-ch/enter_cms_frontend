@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:enter_cms_flutter/models/floorplan.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 
 class PanZoomMapView extends StatefulWidget {
@@ -10,12 +11,14 @@ class PanZoomMapView extends StatefulWidget {
           BuildContext context, vector_math.Quad viewport, double scaleFactor)?
       overlayBuilder;
   final void Function(Offset position)? onTap;
+  final void Function(double scale)? onScale;
 
   const PanZoomMapView({
     super.key,
     this.floorplan,
     this.overlayBuilder,
     this.onTap,
+    this.onScale,
   });
 
   static bool isPositionInView(Offset position, vector_math.Quad viewport) {
@@ -177,6 +180,9 @@ class _PanZoomMapViewState extends State<PanZoomMapView>
           boundaryMargin: EdgeInsets.symmetric(
               horizontal: size.width, vertical: size.height),
           builder: (context, viewport) {
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              widget.onScale?.call(_getCurrentScaleFactor());
+            });
             final overlay = widget.overlayBuilder
                 ?.call(context, viewport, _getCurrentScaleFactor());
             return GestureDetector(

@@ -277,9 +277,9 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
       '/cms/beacons/$id/',
       data: {
         'beacon_id': beaconId,
-        'position': position?.toJson(),
-        'touchpoint': touchpoint?.toJson(),
-        'radius': radius,
+        if (position != null) 'position': position.toJson(),
+        if (touchpoint != null) 'touchpoint': touchpoint?.toJson(),
+        if (radius != null) 'radius': radius,
       },
     );
     return MBeacon.fromJson(response.data as Map<String, dynamic>);

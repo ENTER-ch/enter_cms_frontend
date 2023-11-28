@@ -6,10 +6,11 @@ import 'package:enter_cms_flutter/pages/content/components/touchpoint_marker.dar
 import 'package:enter_cms_flutter/pages/content/content_state.dart';
 import 'package:enter_cms_flutter/pages/content/content_tool.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 
-class ContentMapView extends ConsumerWidget {
+class ContentMapView extends HookConsumerWidget {
   const ContentMapView({super.key});
 
   void _onMapClicked(WidgetRef ref, Offset position) {
@@ -45,11 +46,14 @@ class ContentMapView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final floorplan = ref.watch(selectedFloorplanProvider);
+    final mapScale = useState<double>(1);
+
     return Stack(
       children: [
         PanZoomMapView(
           floorplan: floorplan,
           onTap: (position) => _onMapClicked(ref, position),
+          onScale: (scale) => mapScale.value = scale,
           overlayBuilder: (context, viewport, scale) => Stack(
             children: [
               _buildBeaconsOverlay(
@@ -67,7 +71,9 @@ class ContentMapView extends ConsumerWidget {
             ],
           ),
         ),
-        const ContentMapMouseRegion(),
+        ContentMapMouseRegion(
+          scale: mapScale.value,
+        ),
       ],
     );
   }
@@ -128,10 +134,16 @@ class ContentMapView extends ConsumerWidget {
     required double scale,
   }) {
     final beacons = ref.watch(beaconsInViewProvider);
+    final currentTool = ref.watch(contentMapToolControllerProvider);
 
     return Stack(
       children: [
-        ..._beaconsInView(beacons, viewport).map((b) {
+        ..._beaconsInView(beacons, viewport).where(
+          (element) {
+            return currentTool is! MoveBeaconTool ||
+                currentTool.beacon.id != element.id;
+          },
+        ).map((b) {
           final offset = b.position.toOffset();
           return Positioned(
             key: ValueKey("beacon-${b.id}"),
@@ -148,7 +160,12 @@ class ContentMapView extends ConsumerWidget {
 }
 
 class ContentMapMouseRegion extends ConsumerStatefulWidget {
-  const ContentMapMouseRegion({super.key});
+  final double scale;
+
+  const ContentMapMouseRegion({
+    super.key,
+    this.scale = 1,
+  });
 
   @override
   ConsumerState<ContentMapMouseRegion> createState() =>

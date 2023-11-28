@@ -2,6 +2,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:enter_cms_flutter/components/ag_content_preview.dart';
 import 'package:enter_cms_flutter/components/content_nav_widget.dart';
 import 'package:enter_cms_flutter/components/inline_audio_player.dart';
+import 'package:enter_cms_flutter/components/toolbar_button.dart';
 import 'package:enter_cms_flutter/models/ag_content.dart';
 import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/media_track.dart';
@@ -151,28 +152,34 @@ class AGContentListTile extends HookConsumerWidget {
             ? ref.watch(mediaTrackProvider(content.mediaTrackId!))
             : const AsyncValue.data(null);
 
-        return ListTile(
-          dense: true,
-          title: Text(content.shortLabel),
-          subtitle: mediaTrackState.valueOrNull?.previewUrl != null
-              ? InlineAudioPlayer(url: mediaTrackState.value!.previewUrl!)
-              : const Text('No Media'),
-          trailing: IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AGContentEditDialog.edit(
-                  agContentId: id,
+        return Row(
+          children: [
+            Expanded(
+              child: ListTile(
+                dense: true,
+                title: Text(content.shortLabel),
+                subtitle: mediaTrackState.valueOrNull?.previewUrl != null
+                    ? InlineAudioPlayer(url: mediaTrackState.value!.previewUrl!)
+                    : const Text('No Media'),
+                leading: CircleAvatar(
+                  child: Text(
+                    (content.language ?? 'Unknown').toUpperCase(),
+                  ),
                 ),
-              );
-            },
-          ),
-          leading: CircleAvatar(
-            child: Text(
-              (content.language ?? 'Unknown').toUpperCase(),
+              ),
             ),
-          ),
+            ToolbarButton(
+                icon: Icons.edit,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AGContentEditDialog.edit(
+                      agContentId: id,
+                    ),
+                  );
+                }),
+            const SizedBox(width: 8),
+          ],
         );
       },
       orElse: () => const SizedBox.shrink(),
@@ -315,6 +322,8 @@ class AGContentEditDialog extends HookConsumerWidget {
       if (confirmDelete) {
         await cmsApi.deleteAGContent(agContentId!);
         ref.invalidate(aGContentProvider(agContentId!));
+        // TODO This could be made more specific
+        ref.invalidate(touchpointProvider);
         if (context.mounted) Navigator.of(context).pop();
       }
     }

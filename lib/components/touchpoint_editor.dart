@@ -5,11 +5,13 @@ import 'package:enter_cms_flutter/models/checklist.dart';
 import 'package:enter_cms_flutter/models/touchpoint.dart';
 import 'package:enter_cms_flutter/pages/content/components/touchpoint_marker.dart';
 import 'package:enter_cms_flutter/pages/content/content_state.dart';
+import 'package:enter_cms_flutter/pages/content/content_tool.dart';
 import 'package:enter_cms_flutter/providers/model/beacon_provider.dart';
 import 'package:enter_cms_flutter/providers/model/touchpoint_provider.dart';
 import 'package:enter_cms_flutter/providers/services/cms_api_provider.dart';
 import 'package:enter_cms_flutter/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -77,22 +79,27 @@ class TouchpointListTile extends HookConsumerWidget {
     final isEditing = useState(false);
 
     Widget buildTile() => state.when(
-          data: (data) => ListTile(
-            title: Text(data.title),
-            leading: TouchpointMarker(
-              icon: data.type.icon,
-              label: data.touchpointIdString,
-              foregroundColor: data.type.color.computeLuminance() > 0.5
-                  ? Colors.black
-                  : Colors.white,
-              backgroundColor: data.type.color,
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                isEditing.value = true;
-              },
-            ),
+          data: (data) => Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: Text(data.title),
+                  leading: TouchpointMarker(
+                    icon: data.type.icon,
+                    label: data.touchpointIdString,
+                    foregroundColor: data.type.color.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
+                    backgroundColor: data.type.color,
+                  ),
+                ),
+              ),
+              ToolbarButton(
+                icon: Icons.edit,
+                onTap: () => isEditing.value = true,
+              ),
+              const SizedBox(width: 8.0),
+            ],
           ),
           loading: () => const LinearProgressIndicator(),
           error: (error, stackTrace) => ListTile(
@@ -424,6 +431,7 @@ class TouchpointBeaconsEditor extends ConsumerWidget {
       final cmsApi = ref.read(cmsApiProvider);
       await cmsApi.createBeacon(touchpointId: id);
       ref.invalidate(contentViewControllerProvider);
+      ref.invalidate(touchpointProvider(id));
     }
 
     return ContentNavWidget(
@@ -440,6 +448,11 @@ class TouchpointBeaconsEditor extends ConsumerWidget {
             for (final beaconId in data.beaconIds)
               BeaconListTile(
                 id: beaconId,
+              ),
+            if (data.beaconIds.isEmpty)
+              const ListTile(
+                dense: true,
+                title: Text('Click the (+) button to add a beacon'),
               ),
           ],
         ),
@@ -463,11 +476,200 @@ class BeaconListTile extends ConsumerWidget {
     final state = ref.watch(beaconProvider(id));
 
     return state.maybeWhen(
-      data: (beacon) => ListTile(
-        dense: true,
-        title: Text(beacon.beaconId ?? 'No ID'),
+      data: (beacon) => Row(
+        children: [
+          Expanded(
+            child: ListTile(
+              dense: true,
+              title: Text(beacon.idHexString ?? 'No ID'),
+            ),
+          ),
+          CustomPopupMenuButton(
+            icon: Icons.more_vert,
+            items: [
+              PopupMenuItem(
+                child: Text("Edit"),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => BeaconEditDialog(
+                      beaconId: id,
+                    ),
+                  );
+                },
+              ),
+              PopupMenuItem(
+                child: Text("Move"),
+                onTap: () {
+                  ref
+                      .read(contentMapToolControllerProvider.notifier)
+                      .selectTool(MoveBeaconTool(ref, beacon: state.value!));
+                },
+              ),
+              PopupMenuItem(
+                child: Text('Delete'),
+                onTap: () async {
+                  final cmsApi = ref.read(cmsApiProvider);
+                  await cmsApi.deleteBeacon(id);
+                  ref.invalidate(contentViewControllerProvider);
+                  if (state.value?.touchpointId != null) {
+                    ref.invalidate(
+                        touchpointProvider(state.value!.touchpointId!));
+                  }
+                },
+              ),
+            ],
+          ),
+          const SizedBox(width: 8.0),
+        ],
       ),
       orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
+class BeaconEditDialog extends HookConsumerWidget {
+  final int beaconId;
+
+  const BeaconEditDialog({
+    super.key,
+    required this.beaconId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final initializedForm = useState(false);
+    final idController = useTextEditingController();
+    final idText = useState<String>('');
+    final errorText = useState<String?>(null);
+
+    idController.addListener(() {
+      idText.value = idController.text;
+    });
+
+    if (initializedForm.value == false) {
+      final beaconState = ref.watch(beaconProvider(beaconId));
+      beaconState.whenData((content) {
+        idController.text = content.beaconId?.toString() ?? '';
+        initializedForm.value = true;
+      });
+    }
+
+    onSave() async {
+      final cmsApi = ref.read(cmsApiProvider);
+
+      try {
+        await cmsApi.updateBeacon(
+          beaconId,
+          beaconId: idText.value,
+        );
+      } catch (e) {
+        errorText.value = e.toString();
+        return;
+      }
+
+      ref.invalidate(beaconProvider(beaconId));
+
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+
+    buildIdTile() => ListTile(
+          title: TextField(
+            autofocus: true,
+            controller: idController,
+            decoration: InputDecoration(
+              labelText: 'Beacon ID',
+              errorText: errorText.value,
+            ),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            maxLines: 1,
+          ),
+        );
+
+    buildActions() => Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 8.0,
+            horizontal: 16.0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: onSave,
+                child: const Text('Save'),
+              )
+            ],
+          ),
+        );
+
+    return Dialog(
+      elevation: 0,
+      child: SizedBox(
+        width: 400,
+        height: 200,
+        child: IntrinsicHeight(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(
+                  'Edit Beacon',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              const Divider(),
+              Expanded(
+                child: Column(
+                  children: [
+                    buildIdTile(),
+                  ],
+                ),
+              ),
+              const Divider(),
+              buildActions(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomPopupMenuButton extends StatelessWidget {
+  final IconData icon;
+  final String? label;
+  final String? tooltipText;
+  final List<PopupMenuItem> items;
+
+  const CustomPopupMenuButton({
+    super.key,
+    required this.icon,
+    required this.items,
+    this.label,
+    this.tooltipText,
+  });
+
+  void showPopupMenu(BuildContext context) async {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final position =
+        RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, offset.dy);
+    showMenu(
+      context: context,
+      position: position,
+      elevation: 1,
+      items: items,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ToolbarButton(
+      icon: icon,
+      label: label,
+      tooltipText: tooltipText,
+      onTap: () => showPopupMenu(context),
     );
   }
 }
