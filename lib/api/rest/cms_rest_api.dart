@@ -284,4 +284,12 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
     );
     return MBeacon.fromJson(response.data as Map<String, dynamic>);
   }
+
+  @override
+  Future<List<MBeacon>> getBeacons() async {
+    final response = await get('/cms/beacons/');
+    return (response.data as List)
+        .map((e) => MBeacon.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }

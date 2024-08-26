@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:enter_cms_flutter/layouts/base.dart';
+import 'package:enter_cms_flutter/pages/beacons_page.dart';
 import 'package:enter_cms_flutter/pages/content/content_page.dart';
 import 'package:enter_cms_flutter/pages/devices.dart';
 import 'package:enter_cms_flutter/pages/login.dart';
@@ -56,6 +57,10 @@ class LoginRoute extends GoRouteData {
       path: ContentRouteWithFloorplan.path,
       name: ContentRouteWithFloorplan.name,
     ),
+    TypedGoRoute<BeaconsRoute>(
+      path: BeaconsRoute.path,
+      name: BeaconsRoute.name,
+    ),
     TypedGoRoute<DevicesRoute>(path: DevicesRoute.path),
   ],
 )
@@ -95,6 +100,18 @@ class ContentRouteWithFloorplan extends GoRouteData {
     return ContentPageLoader(
       floorplanId: floorplanId,
     );
+  }
+}
+
+class BeaconsRoute extends GoRouteData {
+  const BeaconsRoute();
+
+  static const path = '/beacons';
+  static const name = 'beacons';
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const BeaconsPage();
   }
 }
 

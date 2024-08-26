@@ -73,7 +73,7 @@ abstract class CmsApi {
   });
 
   /// Beacons
-  /// Beacons
+  Future<List<MBeacon>> getBeacons();
   Future<MBeacon> getBeacon(int id);
   Future<MBeacon> createBeacon({
     required int touchpointId,

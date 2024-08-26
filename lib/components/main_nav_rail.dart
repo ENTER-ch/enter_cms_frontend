@@ -16,6 +16,11 @@ class MainNavigationRail extends StatelessWidget {
       icon: Icons.library_books,
     ),
     GoRouterNavRailDestination(
+      path: '/beacons',
+      label: 'Beacons',
+      icon: Icons.podcasts,
+    ),
+    GoRouterNavRailDestination(
       path: '/devices',
       label: 'Devices',
       disabled: true,

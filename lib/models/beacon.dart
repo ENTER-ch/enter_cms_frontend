@@ -9,8 +9,10 @@ class MBeacon with _$MBeacon {
   const factory MBeacon({
     int? id,
     @JsonKey(name: 'beacon_id') int? beaconId,
-    required MPosition position,
-    @JsonKey(name: 'touchpoint') int? touchpointId,
+    MPosition? position,
+    @JsonKey(name: 'touchpoint') int? touchpointUid,
+    @JsonKey(name: 'touchpoint_id') int? touchpointId,
+    @JsonKey(name: 'touchpoint_title') String? touchpointTitle,
     double? radius,
     String? comment,
   }) = _MBeacon;

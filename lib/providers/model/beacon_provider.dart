@@ -21,4 +21,22 @@ class Beacon extends _$Beacon {
   FutureOr<MBeacon> build(int id) async {
     return _fetchBeacon(id);
   }
+
+  Future<void> delete() async {
+    final api = ref.watch(cmsApiProvider);
+    await api.deleteBeacon(id);
+  }
+}
+
+@riverpod
+class BeaconList extends _$BeaconList {
+  Future<List<MBeacon>> _fetchBeacons() async {
+    final api = ref.watch(cmsApiProvider);
+    return await api.getBeacons();
+  }
+
+  @override
+  FutureOr<List<MBeacon>> build() {
+    return _fetchBeacons();
+  }
 }

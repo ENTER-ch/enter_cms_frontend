@@ -39,7 +39,7 @@ class ContentMapView extends HookConsumerWidget {
       List<MBeacon> beacons, vector_math.Quad viewport) {
     return beacons.where((beacon) {
       return PanZoomMapView.isPositionInView(
-          beacon.position.toOffset(), viewport);
+          beacon.position!.toOffset(), viewport);
     }).toList();
   }
 
@@ -150,7 +150,7 @@ class ContentMapView extends HookConsumerWidget {
                 currentTool.beacon.id != element.id;
           },
         ).map((b) {
-          final offset = b.position.toOffset();
+          final offset = b.position!.toOffset();
           return Positioned(
             key: ValueKey("beacon-${b.id}"),
             left: offset.dx,

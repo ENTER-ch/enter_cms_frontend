@@ -11,8 +11,8 @@ class MPosition with _$MPosition {
 
   const factory MPosition({
     int? id,
-    @JsonKey(name: 'parent')
-    int? parentId,
+    @JsonKey(name: 'parent') int? parentId,
+    @JsonKey(name: 'parent_title') String? parentTitle,
     required double x,
     required double y,
   }) = _MPosition;
