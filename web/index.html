@@ -34,24 +34,22 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="index.css">
 
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
+  <!-- This script adds the flutter initialization JS code
+  <script src="flutter.js" defer></script> -->
 </head>
 
 <body>
   <script>
-    window.addEventListener('load', function (ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: "{{flutter_service_worker_version}}",
-        }
-      }).then(function (engineInitializer) {
-        return engineInitializer.initializeEngine();
-      }).then(function (appRunner) {
-        return appRunner.runApp();
+    { { flutter_js } }
+    { { flutter_build_config } }
+
+    _flutter.loader.load({
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine();
+
+        await appRunner.runApp();
         document.querySelector('.preload').style.display = 'none';
-      });
+      }
     });
   </script>
   <div class="preload">
