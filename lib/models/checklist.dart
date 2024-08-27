@@ -31,6 +31,7 @@ class MChecklistItem with _$MChecklistItem {
   static const _codeLabels = {
     "ag_touchpoint_no_content": "No Content",
     "content_media_track_null": "Missing Media",
+    "ag_touchpoint_missing_content_lang": "Missing Language",
   };
 
   const factory MChecklistItem({

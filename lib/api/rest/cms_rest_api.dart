@@ -7,6 +7,7 @@ import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/floorplan.dart';
 import 'package:enter_cms_flutter/models/floorplan_view.dart';
+import 'package:enter_cms_flutter/models/media_language.dart';
 import 'package:enter_cms_flutter/models/media_track.dart';
 import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/position.dart';
@@ -290,6 +291,14 @@ class CmsRestApi extends EnterRestApi implements CmsApi {
     final response = await get('/cms/beacons/');
     return (response.data as List)
         .map((e) => MBeacon.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<List<MMediaLanguage>> getMediaLanguages() async {
+    final response = await get('/cms/languages/');
+    return (response.data as List)
+        .map((e) => MMediaLanguage.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 }

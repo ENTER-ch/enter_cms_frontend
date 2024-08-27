@@ -4,6 +4,7 @@ import 'package:enter_cms_flutter/models/ag_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/beacon.dart';
 import 'package:enter_cms_flutter/models/floorplan.dart';
 import 'package:enter_cms_flutter/models/floorplan_view.dart';
+import 'package:enter_cms_flutter/models/media_language.dart';
 import 'package:enter_cms_flutter/models/media_track.dart';
 import 'package:enter_cms_flutter/models/mp_touchpoint_config.dart';
 import 'package:enter_cms_flutter/models/position.dart';
@@ -89,4 +90,7 @@ abstract class CmsApi {
     double? radius,
   });
   Future<void> deleteBeacon(int id);
+
+  /// Languages
+  Future<List<MMediaLanguage>> getMediaLanguages();
 }
