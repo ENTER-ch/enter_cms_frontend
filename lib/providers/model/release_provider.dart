@@ -32,7 +32,7 @@ class Release extends _$Release {
       _refreshTimer?.cancel();
       _refreshTimer = Timer(
         const Duration(seconds: 1),
-        () => ref.invalidate(releaseProvider(id)),
+        () => build(id),
       );
     }
 

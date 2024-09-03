@@ -150,23 +150,24 @@ class AGContentEditDialog extends HookConsumerWidget {
             ),
           ),
           languages.when(
-            data: (languages) => ToggleButtons(
-              onPressed: (int index) {
-                selectedLanguage.value = languages[index];
+            data: (languages) => DropdownButton<MMediaLanguage>(
+              underline: const SizedBox(),
+              padding: const EdgeInsets.only(left: 8.0),
+              value: selectedLanguage.value,
+              hint: const Text('Select Language'),
+              onChanged: (MMediaLanguage? newValue) {
+                if (newValue != null) {
+                  selectedLanguage.value = newValue;
+                }
               },
-              renderBorder: false,
-              isSelected: languages
-                  .map((lang) =>
-                      lang.shortCode == selectedLanguage.value.shortCode)
-                  .toList(),
-              children: languages
-                  .map(
-                    (lang) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(lang.name ?? 'Unknown'),
-                    ),
-                  )
-                  .toList(),
+              items: languages.map<DropdownMenuItem<MMediaLanguage>>(
+                (MMediaLanguage lang) {
+                  return DropdownMenuItem<MMediaLanguage>(
+                    value: lang,
+                    child: Text(lang.name ?? 'Unknown'),
+                  );
+                },
+              ).toList(),
             ),
             loading: () => const CircularProgressIndicator(),
             error: (err, stack) => Text('Error: $err'),
